@@ -104,7 +104,18 @@ Run it:
 npx tsx index.ts
 \`\`\`
 
-That's it. Embedded Postgres boots, schema created, 6 runtimes registered, admin API + callback API + SSE events — all ready.`,
+That's it. Embedded Postgres boots, schema created, 6 runtimes registered, admin API + callback API + SSE events — all ready.
+
+## Build Guideline
+
+Read the full **[BUILD_GUIDELINE.md](https://github.com/BoringOS-dev/boringos/blob/main/BUILD_GUIDELINE.md)** for how to structure a BoringOS app — agent definitions, custom context providers, block handlers, seed data, and frontend setup.
+
+**Using an AI coding agent?** Point it at these two files and let it build:
+
+1. **[CLAUDE.md](https://github.com/BoringOS-dev/boringos/blob/main/CLAUDE.md)** — framework overview, all packages, every API endpoint
+2. **[BUILD_GUIDELINE.md](https://github.com/BoringOS-dev/boringos/blob/main/BUILD_GUIDELINE.md)** — app structure, how to define agents, workflows, connectors, custom schema
+
+Your AI agent reads the specs, understands the framework, and builds your app. That's the BoringOS way.`,
   },
   {
     id: "core-concepts",
