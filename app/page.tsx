@@ -20,7 +20,7 @@ const features = [
   },
   {
     title: "Workflows",
-    description: "DAG engine with branching, conditions, delays. Trigger from events, cron, webhooks. Agents compose into pipelines.",
+    description: "DAG engine with 6 block types. Wake agents, call connectors, branch on conditions. Smart routines that check before spawning.",
     accent: "var(--accent-2)",
   },
   {
@@ -47,7 +47,7 @@ const features = [
 
 const stats = [
   { value: "14", label: "npm packages" },
-  { value: "111", label: "tests passing" },
+  { value: "118", label: "tests passing" },
   { value: "6", label: "runtime adapters" },
   { value: "12", label: "agent personas" },
   { value: "0", label: "config required" },

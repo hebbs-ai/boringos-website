@@ -171,12 +171,22 @@ Pluggable cognitive memory. Every component ships \`skillMarkdown()\` that teach
 DAG-based execution engine:
 
 \`\`\`
-Trigger → Classify → Condition
-                      ├─ true  → Agent Task → Approval → Complete
-                      └─ false → Archive
+Trigger → Fetch Emails → Condition (any new?)
+                          ├─ true  → Wake Agent → Process
+                          └─ false → Skip (save cost)
 \`\`\`
 
-Built-in handlers: trigger, condition, delay, transform. Add custom handlers with \`app.blockHandler()\`.
+**6 built-in handlers:**
+- \`trigger\` — entry point
+- \`condition\` — true/false branching
+- \`delay\` — wait N milliseconds
+- \`transform\` — map/reshape data
+- \`wake-agent\` — wake an agent from within a workflow (enables "smart routines")
+- \`connector-action\` — call any connector action (e.g., \`list_emails\`, \`list_events\`) with auto credential lookup
+
+Add custom handlers with \`app.blockHandler()\`.
+
+**Workflow-triggered routines:** Instead of waking an expensive agent on every cron tick, target a workflow that runs cheap checks first and only wakes the agent when needed.
 
 ## Connectors
 
@@ -294,7 +304,7 @@ const server = await app.listen(3000);
 | \`@boringos/memory\` | MemoryProvider interface + Hebbs provider + null provider |
 | \`@boringos/drive\` | StorageBackend + DriveManager with file indexing + memory sync |
 | \`@boringos/db\` | Drizzle schema + embedded Postgres + migration manager |
-| \`@boringos/workflow\` | DAG workflow engine + typed block handlers |
+| \`@boringos/workflow\` | DAG workflow engine + 6 block handlers (incl. wake-agent, connector-action) |
 | \`@boringos/pipeline\` | QueueAdapter — in-process (default) or BullMQ |
 | \`@boringos/connector\` | Connector SDK — OAuth, events, actions, test harness |
 | \`@boringos/connector-slack\` | Slack — messages, threads, reactions |
@@ -377,7 +387,7 @@ npx create-boringos my-app --full
 - **Goals:** \`GET/POST /goals\`, \`PATCH /goals/:id\`
 - **Labels:** \`GET/POST /labels\`, \`POST/DELETE /tasks/:id/labels/:labelId\`
 - **Budgets:** \`GET/POST /budgets\`, \`DELETE /budgets/:id\`, \`GET /budgets/incidents\`
-- **Routines:** \`GET/POST /routines\`, \`PATCH/DELETE /routines/:id\`, \`POST /routines/:id/trigger\`
+- **Routines:** \`GET/POST /routines\` (supports \`assigneeAgentId\` OR \`workflowId\`), \`PATCH/DELETE /routines/:id\`, \`POST /routines/:id/trigger\`
 - **Evals:** \`GET/POST /evals\`, \`POST /evals/:id/run\`, \`GET /evals/:id/runs\`
 - **Inbox:** \`GET /inbox\`, \`GET /inbox/:id\`, \`POST /inbox/:id/archive\`, \`POST /inbox/:id/create-task\`
 - **Drive:** \`GET /drive/list\`, \`GET/PATCH /drive/skill\`, \`GET /drive/skill/revisions\`
