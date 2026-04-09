@@ -115,6 +115,21 @@ AI agents run as **CLI subprocesses** — Claude Code, Codex, Gemini CLI, Ollama
 
 Each agent has a **role** (engineer, researcher, PM, etc.) that determines its persona — how it thinks, writes, and approaches work.
 
+**Templates:** Create agents from built-in templates with one call:
+\`\`\`typescript
+await createAgentFromTemplate(db, "engineer", { tenantId, name: "Code Bot" });
+\`\`\`
+
+**Teams:** Create full teams with hierarchy pre-wired:
+\`\`\`typescript
+await createTeam(db, "engineering", { tenantId });
+// → CTO + 2 Engineers + QA, all with reportsTo set
+\`\`\`
+
+5 built-in teams: engineering, executive, content, sales, support.
+
+**Hierarchy:** Agents have a \`reportsTo\` field. The framework injects org context ("You report to: CTO. Your reports: Engineer 1, Engineer 2."), handles delegation (match task to best report by role), and escalation (blocked → auto-create task for boss).
+
 ## Tasks
 
 Work items assigned to agents. Tasks have:

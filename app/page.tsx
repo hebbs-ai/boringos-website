@@ -15,7 +15,7 @@ await app.listen(3000);
 const features = [
   {
     title: "Agent Execution",
-    description: "6 runtimes. 12 personas. Context pipeline. Session continuity. Budget enforcement. Your agents run — you don't babysit them.",
+    description: "6 runtimes. 12 personas. 5 team templates. Org hierarchy with delegation and escalation. Create a full engineering team in one call.",
     accent: "var(--accent)",
   },
   {
@@ -47,7 +47,7 @@ const features = [
 
 const stats = [
   { value: "14", label: "npm packages" },
-  { value: "118", label: "tests passing" },
+  { value: "122", label: "tests passing" },
   { value: "6", label: "runtime adapters" },
   { value: "12", label: "agent personas" },
   { value: "0", label: "config required" },
