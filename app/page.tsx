@@ -1,16 +1,26 @@
 import Link from "next/link";
 import { HeroCanvas } from "./components/hero-canvas";
 
-const codeExample = `import { BoringOS } from "@boringos/core";
-import { slack } from "@boringos/connector-slack";
-import { google } from "@boringos/connector-google";
+const codeExample = `// Create an AI workforce in 5 lines
 
 const app = new BoringOS({});
-app.connector(slack({ signingSecret: "..." }));
-app.connector(google({ clientId: "...", clientSecret: "..." }));
-
 await app.listen(3000);
-// That's it. Agents are ready.`;
+
+// Spin up a full engineering team — CEO delegates to CTO,
+// CTO assigns to engineers, QA validates. All autonomous.
+await createTeam(db, "engineering", { tenantId });
+
+// Give them a goal
+await createTask(db, {
+  title: "Build the MVP",
+  description: "Ship user auth, dashboard, and billing by Friday.",
+  assigneeAgentId: ctoId,  // CTO breaks it down, delegates to engineers
+});
+
+// CEO wakes up. Reads the task. Delegates to CTO.
+// CTO creates subtasks. Assigns to engineers.
+// Engineers write code. QA reviews. Tasks complete.
+// You watch from the dashboard.`;
 
 const features = [
   {
@@ -101,7 +111,7 @@ export default function Home() {
           </div>
 
           <div className="inline-block px-4 py-1.5 border border-[var(--border)] rounded-full text-xs text-[var(--muted)] mb-8">
-            v0.1.0 — 14 packages published on npm
+            14 packages on npm — create an AI team in one API call
           </div>
 
           <h1 className="text-6xl md:text-7xl font-bold tracking-tight leading-[1.1] mb-6">
@@ -190,16 +200,19 @@ export default function Home() {
       {/* How it works — Pac-Man style pipeline */}
       <section className="relative z-10 px-6 py-24 border-t border-[var(--border)]">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-16">
-            How agents <span style={{ color: "var(--accent)" }}>execute</span>
+          <h2 className="text-4xl font-bold text-center mb-4">
+            From goal to <span style={{ color: "var(--accent)" }}>done</span>
           </h2>
+          <p className="text-center text-[var(--muted)] mb-16 max-w-lg mx-auto">
+            You set the goal. The AI team figures out the rest.
+          </p>
           <div className="space-y-0">
             {[
-              { step: "1", label: "Wake", desc: "Agent receives a task. Wakeup coalescing prevents duplicate runs." },
-              { step: "2", label: "Context", desc: "12 providers build system instructions + task context. Persona, memory, protocol — all assembled." },
-              { step: "3", label: "Execute", desc: "Runtime spawns the CLI — Claude, Codex, Gemini, Ollama, or any command. Streams output live via SSE." },
-              { step: "4", label: "Callback", desc: "Agent calls back to update tasks, post comments, record work products, request approvals." },
-              { step: "5", label: "Complete", desc: "Run persists. Session saved for continuity. Cost tracked. Memory updated. Next agent can pick up where this one left off." },
+              { step: "1", label: "Create team", desc: "One API call creates your AI workforce — CEO, CTO, engineers, QA — with hierarchy and personas pre-configured." },
+              { step: "2", label: "Assign a goal", desc: "\"Build the MVP by Friday.\" Assign to the CEO or CTO. They understand what to do." },
+              { step: "3", label: "Delegation", desc: "CTO reads the goal, breaks it into subtasks, assigns each to the right engineer based on skills. QA gets the test plan." },
+              { step: "4", label: "Autonomous work", desc: "Each agent spawns a CLI (Claude, Codex, Gemini), writes code, runs tests, posts updates. Budget enforced. Memory shared." },
+              { step: "5", label: "Escalation & completion", desc: "Stuck? Agent escalates to its boss. Need approval? Humans approve via dashboard. Done? Tasks close, memory persists, next goal begins." },
             ].map((s, i) => (
               <div key={s.step} className="flex items-start gap-6 py-6">
                 <div className="shrink-0 w-10 h-10 rounded-full border-2 flex items-center justify-center text-sm font-bold" style={{ borderColor: "var(--accent)", color: "var(--accent)" }}>
@@ -225,19 +238,28 @@ export default function Home() {
 
           <div className="inline-block text-left">
             <div className="bg-[var(--code-bg)] border border-[var(--border)] rounded-2xl p-6 neon-border font-mono text-sm">
-              <div className="text-[var(--muted)]">$ npx create-boringos my-crm</div>
-              <div className="text-[var(--muted)]">$ cd my-crm</div>
+              <div className="text-[var(--muted)]">$ npx create-boringos my-startup</div>
               <div className="text-[var(--muted)]">$ npm run dev</div>
-              <div className="mt-4 text-[var(--accent)]">
-                ✓ Embedded Postgres started<br/>
-                ✓ Schema created (30+ tables)<br/>
-                ✓ 6 runtimes registered<br/>
-                ✓ 12 personas loaded<br/>
-                ✓ Admin API ready at /api/admin<br/>
-                ✓ SSE events at /api/events<br/>
-                ✓ Health check at /health<br/>
+              <div className="mt-3 text-[var(--accent)]">
+                ✓ Server running at http://localhost:3000<br/>
+              </div>
+              <div className="mt-3 text-[var(--muted)]">$ curl -X POST /api/admin/teams/from-template \</div>
+              <div className="text-[var(--muted)]">{"  "}-d {`'{"template": "engineering"}'`}</div>
+              <div className="mt-3 text-[var(--accent)]">
+                ✓ Created CTO (reports to: none)<br/>
+                ✓ Created Senior Engineer (reports to: CTO)<br/>
+                ✓ Created Engineer (reports to: CTO)<br/>
+                ✓ Created QA Engineer (reports to: CTO)<br/>
+              </div>
+              <div className="mt-3 text-[var(--muted)]">$ curl -X POST /api/admin/agents/cto-id/wake \</div>
+              <div className="text-[var(--muted)]">{"  "}-d {`'{"taskId": "build-mvp"}'`}</div>
+              <div className="mt-3 text-[var(--accent)]">
+                ✓ CTO woken — reading task...<br/>
+                ✓ CTO delegated "Auth module" → Senior Engineer<br/>
+                ✓ CTO delegated "Dashboard" → Engineer<br/>
+                ✓ CTO delegated "Test plan" → QA Engineer<br/>
                 <br/>
-                <span className="text-white font-semibold">Server running at http://localhost:3000</span>
+                <span className="text-white font-semibold">Your AI team is working. Check the dashboard.</span>
               </div>
             </div>
           </div>
