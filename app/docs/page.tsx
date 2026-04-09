@@ -179,7 +179,7 @@ Add your own: \`app.contextProvider(myProvider)\`
 Pluggable cognitive memory. Every component ships \`skillMarkdown()\` that teaches agents how to use it — this is the **Code + Knowledge** pattern.
 
 - \`nullMemory\` — default, no-op
-- \`createHebbsMemory()\` — Hebbs HTTP client with remember, recall, prime, forget
+- \`createHebbsMemory()\` — hebbs.ai client with remember, recall, prime, forget
 
 ## Workflows
 
@@ -316,7 +316,7 @@ const server = await app.listen(3000);
 | \`@boringos/core\` | Application host — BoringOS class, builder API, HTTP server |
 | \`@boringos/agent\` | Execution engine — context pipeline, wakeups, personas, budget |
 | \`@boringos/runtime\` | 6 runtime modules + registry + subprocess spawning |
-| \`@boringos/memory\` | MemoryProvider interface + Hebbs provider + null provider |
+| \`@boringos/memory\` | MemoryProvider interface + hebbs.ai provider + null provider |
 | \`@boringos/drive\` | StorageBackend + DriveManager with file indexing + memory sync |
 | \`@boringos/db\` | Drizzle schema + embedded Postgres + migration manager |
 | \`@boringos/workflow\` | DAG workflow engine + 6 block handlers (incl. wake-agent, connector-action) |

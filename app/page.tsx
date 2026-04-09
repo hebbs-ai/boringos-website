@@ -40,7 +40,7 @@ const features = [
   },
   {
     title: "Memory",
-    description: "Agents remember. Agents recall. Agents learn across runs. Pluggable — Hebbs, or bring your own cognitive engine.",
+    description: "Agents remember. Agents recall. Agents learn across runs. Pluggable — hebbs.ai, or bring your own cognitive engine.",
     accent: "var(--accent)",
   },
   {
