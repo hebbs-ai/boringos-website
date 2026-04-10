@@ -202,17 +202,39 @@ Trigger → Fetch Emails → Condition (any new?)
                           └─ false → Skip (save cost)
 \`\`\`
 
-**6 built-in handlers:**
+**9 built-in handlers:**
 - \`trigger\` — entry point
 - \`condition\` — true/false branching
 - \`delay\` — wait N milliseconds
 - \`transform\` — map/reshape data
 - \`wake-agent\` — wake an agent from within a workflow (enables "smart routines")
 - \`connector-action\` — call any connector action (e.g., \`list_emails\`, \`list_events\`) with auto credential lookup
+- \`for-each\` — iterate over arrays from previous blocks (e.g., list of emails)
+- \`create-inbox-item\` — store data in inbox (single or batch). Used in sync workflows.
+- \`emit-event\` — emit connector events so \`routeToInbox()\` and listeners can catch them
 
 Add custom handlers with \`app.blockHandler()\`.
 
 **Workflow-triggered routines:** Instead of waking an expensive agent on every cron tick, target a workflow that runs cheap checks first and only wakes the agent when needed.
+
+## Syncing External Data (Pattern A)
+
+The recommended pattern for syncing emails, Slack messages, calendar events, etc.:
+
+\`\`\`
+Routine (every 15min) → Workflow:
+  1. connector-action(list_emails)    → fetch from Gmail (auto-enriched)
+  2. for-each({{fetch.messages}})      → iterate results
+  3. create-inbox-item(source:"gmail") → store in inbox with subject, from, snippet
+  4. condition(count > 0?)             → any new?
+  5. wake-agent(triage-agent)          → process from inbox
+\`\`\`
+
+Emails are **stored in inbox before the agent runs**. Users see them in the dashboard immediately. Agent works from inbox, not Gmail directly. If agent fails, data is still saved.
+
+**Gmail auto-enrichment:** The \`list_emails\` action automatically fetches subject, from, snippet, and date for each message — not just IDs. No extra \`read_email\` step needed for basic sync.
+
+Works for any connector: Slack (\`list_messages\`), Calendar (\`list_events\`), GitHub (\`list_issues\`).
 
 ## Connectors
 
@@ -330,7 +352,7 @@ const server = await app.listen(3000);
 | \`@boringos/memory\` | MemoryProvider interface + hebbs.ai provider + null provider |
 | \`@boringos/drive\` | StorageBackend + DriveManager with file indexing + memory sync |
 | \`@boringos/db\` | Drizzle schema + embedded Postgres + migration manager |
-| \`@boringos/workflow\` | DAG workflow engine + 6 block handlers (incl. wake-agent, connector-action) |
+| \`@boringos/workflow\` | DAG workflow engine + 9 block handlers (incl. wake-agent, connector-action, for-each, create-inbox-item, emit-event) |
 | \`@boringos/pipeline\` | QueueAdapter — in-process (default) or BullMQ |
 | \`@boringos/connector\` | Connector SDK — OAuth, events, actions, test harness |
 | \`@boringos/connector-slack\` | Slack — messages, threads, reactions |

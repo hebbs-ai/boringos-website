@@ -57,7 +57,7 @@ const features = [
 
 const stats = [
   { value: "14", label: "npm packages" },
-  { value: "122", label: "tests passing" },
+  { value: "126", label: "tests passing" },
   { value: "6", label: "runtime adapters" },
   { value: "12", label: "agent personas" },
   { value: "0", label: "config required" },
