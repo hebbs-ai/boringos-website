@@ -604,6 +604,57 @@ const unsubscribe = client.subscribe((event) => {
 unsubscribe();
 \`\`\``,
   },
+  {
+    title: "Copilot",
+    content: `Every BoringOS app ships with a built-in **copilot** — a conversational AI assistant that can both **operate** your system (manage tasks, agents, data) and **build** new features (edit code, add integrations).
+
+## How it works
+
+Copilot sessions are tasks with \`originKind: "copilot"\`. Messages are comments. The copilot agent auto-wakes when you post a message — same pattern as any agent task.
+
+\`\`\`
+User types "Show me all blocked tasks"
+  → Message saved as comment on copilot session task
+  → Copilot agent auto-wakes
+  → Agent reads codebase + calls admin API
+  → Agent posts reply as comment
+  → UI polls and renders the reply
+\`\`\`
+
+## Zero configuration
+
+The copilot agent (role: \`copilot\`) is auto-created on boot. Session routes are registered automatically. No \`app.copilot()\` call needed.
+
+\`\`\`
+POST   /api/copilot/sessions              — create session
+GET    /api/copilot/sessions              — list sessions
+GET    /api/copilot/sessions/:id          — get messages
+POST   /api/copilot/sessions/:id/message  — send + auto-wake agent
+DELETE /api/copilot/sessions/:id          — archive
+\`\`\`
+
+## What the copilot can do
+
+| Ask | What happens |
+|---|---|
+| "Show all blocked tasks" | Calls admin API, formats results |
+| "Create a task for Q2 review" | Calls POST /api/admin/tasks |
+| "Add a chart to the dashboard" | Edits page.tsx, confirms the change |
+| "Why did the finance agent fail?" | Reads run logs, explains the error |
+| "Change email sync to every 5 min" | Edits routine or workflow config |
+
+## Agent permissions
+
+All agents (including copilot) run with \`--dangerously-skip-permissions\` — full file read/write access for autonomous operation. No interactive approval needed.
+
+## Auto-post results
+
+After every agent run on a task, the framework extracts the result text and posts it as a comment. This enables conversational workflows — the copilot's reply appears in the chat UI without the agent explicitly calling the comment API.
+
+## UI
+
+Use the \`<CopilotPanel />\` component from \`@boringos/ui\`, or build your own chat UI using the copilot API.`,
+  },
 ];
 
 export default function DocsPage() {
