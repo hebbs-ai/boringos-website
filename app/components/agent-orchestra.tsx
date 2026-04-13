@@ -25,14 +25,16 @@ interface AgentDef {
 }
 
 const AGENTS: AgentDef[] = [
+  // ── Row 0: CEO ──
   {
     id: "ceo",
     label: "CEO",
     role: "Strategy",
     color: [0, 255, 136],
     parentId: null,
-    statuses: ["Setting Q3 goals", "Reviewing pipeline", "Delegating to CTO", "Approving budget", "Analyzing metrics"],
+    statuses: ["Setting Q3 goals", "Reviewing pipeline", "Delegating to leads", "Approving budget", "Analyzing metrics"],
   },
+  // ── Row 1: VP / Lead layer ──
   {
     id: "cto",
     label: "CTO",
@@ -41,6 +43,31 @@ const AGENTS: AgentDef[] = [
     parentId: "ceo",
     statuses: ["Breaking down MVP", "Assigning sprints", "Reviewing architecture", "Prioritizing backlog", "Unblocking engineers"],
   },
+  {
+    id: "cmo",
+    label: "CMO",
+    role: "Marketing",
+    color: [255, 200, 0],
+    parentId: "ceo",
+    statuses: ["Planning launch campaign", "Reviewing brand assets", "Assigning content briefs", "Analyzing traffic", "Approving copy"],
+  },
+  {
+    id: "head-sales",
+    label: "VP Sales",
+    role: "Revenue",
+    color: [255, 100, 60],
+    parentId: "ceo",
+    statuses: ["Reviewing pipeline", "Setting quotas", "Coaching reps", "Forecasting Q3", "Approving discounts"],
+  },
+  {
+    id: "copilot",
+    label: "Copilot",
+    role: "AI Assistant",
+    color: [0, 255, 200],
+    parentId: "ceo",
+    statuses: ["Answering query", "Editing codebase", "Generating report", "Searching memory", "Building connector"],
+  },
+  // ── Row 2: Individual contributors ──
   {
     id: "eng-fe",
     label: "Frontend",
@@ -66,30 +93,67 @@ const AGENTS: AgentDef[] = [
     statuses: ["Running test suite", "Filing bug report", "E2E testing", "Validating deploy", "Writing test plan"],
   },
   {
-    id: "copilot",
-    label: "Copilot",
-    role: "AI Assistant",
-    color: [0, 255, 200],
-    parentId: "ceo",
-    statuses: ["Answering query", "Editing codebase", "Generating report", "Searching memory", "Building connector"],
+    id: "researcher",
+    label: "Researcher",
+    role: "Market Intel",
+    color: [100, 200, 255],
+    parentId: "cmo",
+    statuses: ["Scraping competitor data", "Analyzing market trends", "Compiling report", "Sourcing case studies", "Web research"],
+  },
+  {
+    id: "writer",
+    label: "Writer",
+    role: "Content",
+    color: [220, 160, 255],
+    parentId: "cmo",
+    statuses: ["Drafting blog post", "Writing landing copy", "Editing newsletter", "Creating social posts", "SEO optimization"],
+  },
+  {
+    id: "sdr",
+    label: "SDR",
+    role: "Outbound",
+    color: [255, 160, 100],
+    parentId: "head-sales",
+    statuses: ["Cold outreach: 12 sent", "Qualifying lead", "Booking demo", "Follow-up sequence", "Enriching contacts"],
+  },
+  {
+    id: "ae",
+    label: "AE",
+    role: "Closer",
+    color: [255, 80, 120],
+    parentId: "head-sales",
+    statuses: ["Running discovery call", "Sending proposal", "Negotiating terms", "Closing deal: $80k", "Updating CRM"],
   },
 ];
 
 // ── Event messages that float up ──
 
 const EVENT_MESSAGES = [
+  // Engineering
   { text: "Task delegated: Build auth module", color: [0, 255, 136], icon: "→" },
   { text: "PR merged: Dashboard v2", color: [140, 90, 255], icon: "✓" },
   { text: "3 subtasks created by CTO", color: [0, 204, 255], icon: "→" },
   { text: "Test suite passed: 47/47", color: [255, 60, 100], icon: "✓" },
   { text: "Deploy to staging complete", color: [0, 255, 136], icon: "✓" },
   { text: "Bug escalated to CTO", color: [255, 140, 0], icon: "↑" },
+  { text: "Engineer requested code review", color: [140, 90, 255], icon: "↑" },
+  // Marketing
+  { text: "Blog post drafted: AI in Sales", color: [220, 160, 255], icon: "✓" },
+  { text: "Competitor report: 8 insights", color: [100, 200, 255], icon: "◆" },
+  { text: "CMO assigned content brief", color: [255, 200, 0], icon: "→" },
+  { text: "Researcher: market data compiled", color: [100, 200, 255], icon: "✓" },
+  { text: "Landing page copy approved", color: [220, 160, 255], icon: "✓" },
+  // Sales
+  { text: "SDR: 12 outreach emails sent", color: [255, 160, 100], icon: "✓" },
+  { text: "AE closed deal: Acme $80k", color: [255, 80, 120], icon: "✓" },
+  { text: "VP Sales reviewed pipeline", color: [255, 100, 60], icon: "●" },
+  { text: "Demo booked: Stripe (Wed 2pm)", color: [255, 160, 100], icon: "◆" },
+  { text: "Proposal sent: $120k annual", color: [255, 80, 120], icon: "→" },
+  // Cross-functional
   { text: "Memory: deal pattern detected", color: [0, 255, 200], icon: "◆" },
   { text: "Budget check: $0.12 used", color: [0, 204, 255], icon: "●" },
   { text: "Copilot: code review complete", color: [0, 255, 200], icon: "✓" },
-  { text: "QA approved release candidate", color: [255, 60, 100], icon: "✓" },
   { text: "CEO reviewed weekly metrics", color: [0, 255, 136], icon: "●" },
-  { text: "Engineer requested code review", color: [140, 90, 255], icon: "↑" },
 ];
 
 export function AgentOrchestra() {
@@ -156,17 +220,17 @@ export function AgentOrchestra() {
 
     function layoutNodes() {
       // Tree layout:
-      // Row 0: CEO (center)
-      // Row 1: CTO, Copilot
-      // Row 2: Frontend, Backend, QA
+      // Row 0: CEO
+      // Row 1: CTO, CMO, VP Sales, Copilot
+      // Row 2: FE, BE, QA, Researcher, Writer, SDR, AE
 
-      const rowGap = Math.min(130, H * 0.28);
-      const topPad = 60;
+      const rowGap = Math.min(120, H * 0.22);
+      const topPad = 55;
 
       const rows: string[][] = [
         ["ceo"],
-        ["cto", "copilot"],
-        ["eng-fe", "eng-be", "qa"],
+        ["cto", "cmo", "head-sales", "copilot"],
+        ["eng-fe", "eng-be", "qa", "researcher", "writer", "sdr", "ae"],
       ];
 
       nodes = [];
@@ -175,7 +239,8 @@ export function AgentOrchestra() {
       for (let r = 0; r < rows.length; r++) {
         const ids = rows[r];
         const count = ids.length;
-        const rowWidth = (count - 1) * Math.min(180, W * 0.25);
+        const spacing = r === 2 ? Math.min(120, (W - 80) / (count - 1)) : Math.min(170, (W - 80) / (count - 1));
+        const rowWidth = (count - 1) * spacing;
         const startX = (W - rowWidth) / 2;
 
         for (let i = 0; i < count; i++) {
@@ -183,7 +248,7 @@ export function AgentOrchestra() {
           const x = count === 1 ? W / 2 : startX + i * (rowWidth / (count - 1));
           const y = topPad + r * rowGap;
 
-          const size = r === 0 ? 32 : r === 1 ? 26 : 22;
+          const size = r === 0 ? 32 : r === 1 ? 24 : 19;
 
           const node: NodeState = {
             def,
@@ -300,20 +365,25 @@ export function AgentOrchestra() {
       ctx!.stroke();
 
       // Label
+      const isLarge = node.radius > 28;
+      const isMed = node.radius > 22;
       ctx!.textAlign = "center";
       ctx!.textBaseline = "middle";
       ctx!.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},0.95)`;
-      ctx!.font = `bold ${node.radius > 28 ? 12 : 10}px system-ui, sans-serif`;
-      ctx!.fillText(node.def.label, node.x, node.y - 3);
-      ctx!.font = `${node.radius > 28 ? 9 : 8}px system-ui, sans-serif`;
-      ctx!.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},0.45)`;
-      ctx!.fillText(node.def.role, node.x, node.y + 9);
+      ctx!.font = `bold ${isLarge ? 12 : isMed ? 10 : 9}px system-ui, sans-serif`;
+      ctx!.fillText(node.def.label, node.x, isMed ? node.y - 3 : node.y - 2);
+
+      if (isMed) {
+        ctx!.font = `${isLarge ? 9 : 8}px system-ui, sans-serif`;
+        ctx!.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},0.45)`;
+        ctx!.fillText(node.def.role, node.x, node.y + 9);
+      }
 
       // Status below node
       const status = node.def.statuses[node.statusIdx];
-      ctx!.font = "9px system-ui, sans-serif";
+      ctx!.font = `${isMed ? 9 : 8}px system-ui, sans-serif`;
       ctx!.fillStyle = "rgba(255,255,255,0.28)";
-      ctx!.fillText(status, node.x, node.y + r + 16);
+      ctx!.fillText(status, node.x, node.y + r + 14);
     }
 
     function getPointOnEdge(from: NodeState, to: NodeState, t: number): { x: number; y: number } {
@@ -481,7 +551,7 @@ export function AgentOrchestra() {
   }, []);
 
   return (
-    <div ref={containerRef} className="relative w-full" style={{ height: 480 }}>
+    <div ref={containerRef} className="relative w-full" style={{ height: 520 }}>
       <canvas ref={canvasRef} className="absolute inset-0" />
     </div>
   );
