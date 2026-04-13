@@ -210,7 +210,7 @@ Trigger → Fetch Emails → Condition (any new?)
 - \`wake-agent\` — wake an agent from within a workflow (enables "smart routines")
 - \`connector-action\` — call any connector action (e.g., \`list_emails\`, \`list_events\`) with auto credential lookup
 - \`for-each\` — iterate over arrays from previous blocks (e.g., list of emails)
-- \`create-inbox-item\` — store data in inbox (single or batch). Used in sync workflows.
+- \`create-inbox-item\` — store data in inbox (single or batch, supports \`assigneeUserId\`). Used in sync workflows.
 - \`emit-event\` — emit connector events so \`routeToInbox()\` and listeners can catch them
 
 Add custom handlers with \`app.blockHandler()\`.
@@ -305,6 +305,7 @@ app.routeToInbox({
     source: "gmail",
     subject: e.data.subject,
     from: e.data.from,
+    assigneeUserId: e.data.assignTo, // optional — route to a specific user
   }),
 });
 
@@ -334,6 +335,7 @@ const server = await app.listen(3000);
 | \`.schema(ddl)\` | Add custom database tables |
 | \`.routeToInbox(config)\` | Route events to inbox |
 | \`.route(path, app)\` | Mount custom Hono routes |
+| \`.onTenantCreated(fn)\` | Hook for app-specific tenant setup (runtimes + copilot already provisioned) |
 | \`.beforeStart(fn)\` | Pre-boot lifecycle hook |
 | \`.afterStart(fn)\` | Post-boot lifecycle hook |
 | \`.beforeShutdown(fn)\` | Shutdown lifecycle hook |
@@ -394,13 +396,15 @@ npx create-boringos my-app --full
 
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | \`/tasks\` | List tasks (filter by status, assignee) |
-| POST | \`/tasks\` | Create task (auto-generates identifier) |
+| GET | \`/tasks\` | List tasks (filter by \`status\`, \`assigneeAgentId\`, \`assigneeUserId\`) |
+| POST | \`/tasks\` | Create task (auto-generates identifier, defaults \`assigneeUserId\` to current user) |
 | GET | \`/tasks/:id\` | Get task + comments + work products |
-| PATCH | \`/tasks/:id\` | Update task |
+| PATCH | \`/tasks/:id\` | Update task (supports \`assigneeUserId\`) |
 | DELETE | \`/tasks/:id\` | Delete task |
 | POST | \`/tasks/:id/comments\` | Post comment |
 | POST | \`/tasks/:id/assign\` | Assign to agent + optionally wake |
+
+**User assignment:** Tasks have both \`assigneeAgentId\` (for agent tasks) and \`assigneeUserId\` (for human tasks). When a user creates a task via session auth, \`assigneeUserId\` defaults to them. Pass \`?assigneeUserId=me\` to filter by the current session user.
 
 ## Runs
 
@@ -437,7 +441,7 @@ npx create-boringos my-app --full
 - **Budgets:** \`GET/POST /budgets\`, \`DELETE /budgets/:id\`, \`GET /budgets/incidents\`
 - **Routines:** \`GET/POST /routines\` (supports \`assigneeAgentId\` OR \`workflowId\`), \`PATCH/DELETE /routines/:id\`, \`POST /routines/:id/trigger\`
 - **Evals:** \`GET/POST /evals\`, \`POST /evals/:id/run\`, \`GET /evals/:id/runs\`
-- **Inbox:** \`GET /inbox\`, \`GET /inbox/:id\`, \`POST /inbox/:id/archive\`, \`POST /inbox/:id/create-task\`
+- **Inbox:** \`GET /inbox\` (filter by \`status\`, \`assigneeUserId\`, supports \`=me\`), \`GET /inbox/:id\`, \`POST /inbox/:id/archive\`, \`POST /inbox/:id/create-task\` (defaults \`assigneeUserId\` to current user)
 - **Drive:** \`GET /drive/list\`, \`GET/PATCH /drive/skill\`, \`GET /drive/skill/revisions\`
 - **Plugins:** \`GET /plugins\`, \`GET /plugins/:name/jobs\`, \`POST /plugins/:name/jobs/:job/trigger\`
 - **Search:** \`GET /search?q=query\`
@@ -457,16 +461,25 @@ Event types: \`run:started\`, \`run:completed\`, \`run:failed\`, \`task:created\
   {
     id: "auth",
     title: "Authentication",
-    content: `## User auth
+    content: `## User auth (multi-tenant SaaS)
 
-**Signup:**
+**Signup — create a new tenant:**
 \`\`\`bash
 curl -X POST /api/auth/signup \\
   -H "Content-Type: application/json" \\
-  -d '{"name": "Alice", "email": "alice@acme.com", "password": "...", "tenantId": "..."}'
+  -d '{"name": "Alice", "email": "alice@acme.com", "password": "...", "tenantName": "Acme Corp"}'
 \`\`\`
 
-Returns \`{ userId, token }\`. The token is a session token valid for 30 days.
+Creates the tenant, auto-seeds 6 runtimes + copilot agent, runs \`onTenantCreated\` hook. Returns \`{ userId, token }\`.
+
+**Signup — join via invite:**
+\`\`\`bash
+curl -X POST /api/auth/signup \\
+  -H "Content-Type: application/json" \\
+  -d '{"name": "Bob", "email": "bob@acme.com", "password": "...", "inviteCode": "abc123"}'
+\`\`\`
+
+Joins the tenant from the invitation. Returns \`{ userId, token }\`.
 
 **Login:**
 \`\`\`bash
@@ -475,19 +488,73 @@ curl -X POST /api/auth/login \\
   -d '{"email": "alice@acme.com", "password": "..."}'
 \`\`\`
 
-Returns \`{ userId, token, name, email }\`.
+Returns \`{ userId, token, name, email, tenants: [{ id, name, role }] }\` — all tenants the user belongs to.
 
 **Current user:**
 \`\`\`bash
-curl /api/auth/me -H "Authorization: Bearer <token>"
+curl /api/auth/me -H "Authorization: Bearer <token>" -H "X-Tenant-Id: <tenant-uuid>"
 \`\`\`
+
+Returns \`{ id, name, email, tenants: [...] }\`. Pass \`X-Tenant-Id\` to select the active tenant (returns \`tenantId\` + \`role\` for that tenant).
+
+## Invitations
+
+Admins can invite users to their tenant:
+
+\`\`\`bash
+# Create invite (admin only, 7-day expiry)
+curl -X POST /api/auth/invite \\
+  -H "Authorization: Bearer <token>" \\
+  -d '{"email": "bob@acme.com", "role": "member"}'
+# Returns { id, inviteCode, expiresAt }
+
+# List pending invitations
+curl /api/auth/invitations -H "Authorization: Bearer <token>"
+
+# Revoke an invitation
+curl -X DELETE /api/auth/invitations/:id -H "Authorization: Bearer <token>"
+\`\`\`
+
+## Team management
+
+Admins can manage users within their tenant:
+
+\`\`\`bash
+# List team members
+curl /api/auth/team -H "Authorization: Bearer <token>"
+
+# Change role (admin only)
+curl -X PATCH /api/auth/team/:userId/role \\
+  -H "Authorization: Bearer <token>" \\
+  -d '{"role": "admin"}'
+
+# Remove user (admin only)
+curl -X DELETE /api/auth/team/:userId -H "Authorization: Bearer <token>"
+\`\`\`
+
+## Roles
+
+Every user has a \`role\` per tenant, stored in \`user_tenants.role\`. The framework surfaces \`role\` on every authenticated request but does **not** enforce what roles mean — that's up to your app.
+
+On session-authenticated requests, the admin API sets \`userId\`, \`tenantId\`, and \`role\` on the request context:
+
+\`\`\`typescript
+// In your app routes, after framework auth middleware runs:
+app.delete("/api/myapp/resources/:id", async (c) => {
+  const role = c.get("role");
+  if (role !== "admin") return c.json({ error: "Forbidden" }, 403);
+  // ... delete logic
+});
+\`\`\`
+
+The framework provides the plumbing (resolving role from session). Your app decides the policy.
 
 ## Admin API auth
 
 The admin API accepts both methods:
 
 1. **API key** — \`X-API-Key: your-admin-key\` + \`X-Tenant-Id: tenant-uuid\`
-2. **Session token** — \`Authorization: Bearer <token>\` (tenant resolved from session)
+2. **Session token** — \`Authorization: Bearer <token>\` (tenant resolved from session, \`userId\` + \`role\` set on context)
 
 ## Agent callback auth
 
@@ -543,7 +610,7 @@ function App() {
 | \`useGoals()\` | goals list | — |
 | \`useOnboarding()\` | onboarding state | — |
 | \`useEvals()\` | evals list | — |
-| \`useInbox(status?)\` | inbox items | — |
+| \`useInbox(status?, assigneeUserId?)\` | inbox items | — |
 | \`useEntityRefs(type, id)\` | linked entities | — |
 | \`useSearch(query)\` | search results | — |
 | \`useHealth()\` | server status (polls 30s) | — |
@@ -606,7 +673,7 @@ unsubscribe();
   },
   {
     title: "Copilot",
-    content: `Every BoringOS app ships with a built-in **copilot** — a conversational AI assistant that can both **operate** your system (manage tasks, agents, data) and **build** new features (edit code, add integrations).
+    content: `Every BoringOS app ships with a built-in **copilot** — a conversational AI assistant that can both **operate** your system (manage tasks, agents, data) and **build** new features (edit code, add integrations). The copilot is **multi-tenant** — it resolves the tenant from the session token and a copilot agent is auto-created for each new tenant on signup.
 
 ## How it works
 
@@ -623,7 +690,7 @@ User types "Show me all blocked tasks"
 
 ## Zero configuration
 
-The copilot agent (role: \`copilot\`) is auto-created on boot. Session routes are registered automatically. No \`app.copilot()\` call needed.
+The copilot agent (role: \`copilot\`) is auto-created per tenant — on boot for the first tenant, and automatically when new tenants sign up. Session routes are registered automatically. No \`app.copilot()\` call needed.
 
 \`\`\`
 POST   /api/copilot/sessions              — create session
