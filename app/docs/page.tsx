@@ -210,7 +210,7 @@ Trigger → Fetch Emails → Condition (any new?)
 - \`wake-agent\` — wake an agent from within a workflow (enables "smart routines")
 - \`connector-action\` — call any connector action (e.g., \`list_emails\`, \`list_events\`) with auto credential lookup
 - \`for-each\` — iterate over arrays from previous blocks (e.g., list of emails)
-- \`create-inbox-item\` — store data in inbox (single or batch, supports \`assigneeUserId\`). Used in sync workflows.
+- \`create-inbox-item\` — store data in inbox (single or batch, supports \`assigneeUserId\`). Used in sync workflows. Emits \`inbox.item_created\` event after creating items.
 - \`emit-event\` — emit connector events so \`routeToInbox()\` and listeners can catch them
 
 Add custom handlers with \`app.blockHandler()\`.
@@ -243,7 +243,45 @@ External service integrations with a clean SDK:
 - **Events** typed and routed via EventBus
 - **Actions** invocable by agents via callback API
 - **Skill files** teach agents how to use each connector
-- **Test harness** for testing without real credentials`,
+- **Test harness** for testing without real credentials
+
+## Event-Driven Architecture
+
+BoringOS is event-driven, not just routine-driven. Connectors emit events, workflow handlers emit events, and app routes can emit events. Agents wake reactively.
+
+**Subscribe** with \`app.onEvent(type, handler)\`:
+
+\`\`\`typescript
+app.onEvent("inbox.item_created", async (event) => {
+  // event: { connectorKind, type, tenantId, data, timestamp }
+  // Wake an agent to process the new inbox item
+  await agentEngine.wake({ agentId, tenantId: event.tenantId,
+    reason: "connector_event", payload: event.data });
+});
+\`\`\`
+
+**Emit** from routes via \`AppContext.eventBus\`:
+
+\`\`\`typescript
+ctx.eventBus.emit({
+  connectorKind: "app", type: "entity.created",
+  tenantId, data: { entityType: "contact", entityId: id },
+  timestamp: new Date(),
+});
+\`\`\`
+
+**Built-in events:** \`inbox.item_created\` (from \`create-inbox-item\` handler, data: \`{ itemId, source }\`)
+
+**The reactive pattern:**
+\`\`\`
+Ingest workflow -> create-inbox-item -> inbox.item_created event
+                                              |
+                               app.onEvent("inbox.item_created", ...)
+                                              |
+                                    Wake triage / enrichment agent
+\`\`\`
+
+Events fire immediately when data arrives — zero latency, zero wasted agent runs. Multiple subscribers can react to the same event.`,
   },
   {
     id: "builder-api",
@@ -333,6 +371,7 @@ const server = await app.listen(3000);
 | \`.blockHandler(handler)\` | Add workflow block handler |
 | \`.persona(role, bundle)\` | Register custom persona |
 | \`.schema(ddl)\` | Add custom database tables |
+| \`.onEvent(type, handler)\` | Subscribe to EventBus events (e.g., \`inbox.item_created\`) |
 | \`.routeToInbox(config)\` | Route events to inbox |
 | \`.route(path, app)\` | Mount custom Hono routes |
 | \`.onTenantCreated(fn)\` | Hook for app-specific tenant setup (runtimes + copilot already provisioned) |
@@ -441,7 +480,7 @@ npx create-boringos my-app --full
 - **Budgets:** \`GET/POST /budgets\`, \`DELETE /budgets/:id\`, \`GET /budgets/incidents\`
 - **Routines:** \`GET/POST /routines\` (supports \`assigneeAgentId\` OR \`workflowId\`), \`PATCH/DELETE /routines/:id\`, \`POST /routines/:id/trigger\`
 - **Evals:** \`GET/POST /evals\`, \`POST /evals/:id/run\`, \`GET /evals/:id/runs\`
-- **Inbox:** \`GET /inbox\` (filter by \`status\`, \`assigneeUserId\`, supports \`=me\`), \`GET /inbox/:id\`, \`POST /inbox/:id/archive\`, \`POST /inbox/:id/create-task\` (defaults \`assigneeUserId\` to current user)
+- **Inbox:** \`GET /inbox\` (filter by \`status\`, \`assigneeUserId\`, supports \`=me\`), \`GET /inbox/:id\`, \`PATCH /inbox/:id\` (update metadata, status, assigneeUserId — agents write analysis results back), \`POST /inbox/:id/archive\`, \`POST /inbox/:id/create-task\` (defaults \`assigneeUserId\` to current user)
 - **Drive:** \`GET /drive/list\`, \`GET/PATCH /drive/skill\`, \`GET /drive/skill/revisions\`
 - **Plugins:** \`GET /plugins\`, \`GET /plugins/:name/jobs\`, \`POST /plugins/:name/jobs/:job/trigger\`
 - **Search:** \`GET /search?q=query\`
