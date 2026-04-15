@@ -427,7 +427,7 @@ npx create-boringos my-app --full
 | GET | \`/agents\` | List agents |
 | POST | \`/agents\` | Create agent |
 | GET | \`/agents/:id\` | Get agent |
-| PATCH | \`/agents/:id\` | Update agent |
+| PATCH | \`/agents/:id\` | Update agent (set \`status: "paused"\` to pause) |
 | POST | \`/agents/:id/wake\` | Wake agent |
 | GET | \`/agents/:id/runs\` | Agent run history |
 
@@ -437,7 +437,7 @@ npx create-boringos my-app --full
 |---|---|---|
 | GET | \`/tasks\` | List tasks (filter by \`status\`, \`assigneeAgentId\`, \`assigneeUserId\`) |
 | POST | \`/tasks\` | Create task (auto-generates identifier, defaults \`assigneeUserId\` to current user) |
-| GET | \`/tasks/:id\` | Get task + comments + work products |
+| GET | \`/tasks/:id\` | Get task + comments + work products + runs + costSummary |
 | PATCH | \`/tasks/:id\` | Update task (supports \`assigneeUserId\`) |
 | DELETE | \`/tasks/:id\` | Delete task |
 | POST | \`/tasks/:id/comments\` | Post comment |
@@ -459,9 +459,10 @@ npx create-boringos my-app --full
 |---|---|---|
 | GET | \`/runtimes\` | List runtimes |
 | POST | \`/runtimes\` | Create runtime |
-| PATCH | \`/runtimes/:id\` | Update runtime |
+| PATCH | \`/runtimes/:id\` | Update runtime (auto-syncs \`model\` and \`config.model\`) |
 | DELETE | \`/runtimes/:id\` | Delete runtime |
 | POST | \`/runtimes/:id/default\` | Set as default |
+| GET | \`/runtimes/:id/models\` | List available models for this runtime type |
 
 ## Approvals
 
@@ -487,6 +488,7 @@ npx create-boringos my-app --full
 - **Activity:** \`GET /activity\`
 - **Onboarding:** \`GET /onboarding\`, \`POST /onboarding/complete-step\`
 - **Entities:** \`POST /entities/link\`, \`GET /entities/:type/:id/refs\`
+- **Settings:** \`GET /settings\` (returns key-value tenant settings), \`PATCH /settings\` (upsert settings, e.g. \`{"agents_paused": "true"}\` for global agent kill switch)
 - **Costs:** \`GET /costs\`
 
 ## SSE Events
@@ -495,7 +497,11 @@ npx create-boringos my-app --full
 GET /api/events?apiKey=...&tenantId=...
 \`\`\`
 
-Event types: \`run:started\`, \`run:completed\`, \`run:failed\`, \`task:created\`, \`task:updated\`, \`task:comment_added\`, \`agent:created\`, \`approval:decided\``,
+Event types: \`run:started\`, \`run:completed\`, \`run:failed\`, \`task:created\`, \`task:updated\`, \`task:comment_added\`, \`agent:created\`, \`approval:decided\`
+
+## Agent Pause
+
+Two levels: **global** (set \`agents_paused: "true"\` via \`PATCH /settings\`) and **per-agent** (set \`status: "paused"\` via \`PATCH /agents/:id\`). Paused runs get status \`"skipped"\` with \`errorCode\` indicating the reason. Run statuses: \`queued\`, \`running\`, \`done\`, \`failed\`, \`cancelled\`, \`skipped\`.`,
   },
   {
     id: "auth",
