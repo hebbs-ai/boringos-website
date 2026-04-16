@@ -501,7 +501,17 @@ Event types: \`run:started\`, \`run:completed\`, \`run:failed\`, \`task:created\
 
 ## Agent Pause
 
-Two levels: **global** (set \`agents_paused: "true"\` via \`PATCH /settings\`) and **per-agent** (set \`status: "paused"\` via \`PATCH /agents/:id\`). Paused runs get status \`"skipped"\` with \`errorCode\` indicating the reason. Run statuses: \`queued\`, \`running\`, \`done\`, \`failed\`, \`cancelled\`, \`skipped\`.`,
+Two levels: **global** (set \`agents_paused: "true"\` via \`PATCH /settings\`) and **per-agent** (set \`status: "paused"\` via \`PATCH /agents/:id\`). Paused runs get status \`"skipped"\` with \`errorCode\` indicating the reason. Run statuses: \`queued\`, \`running\`, \`done\`, \`failed\`, \`cancelled\`, \`skipped\`.
+
+### Pause behavior
+- Already-running agents are **not** killed — they finish their current run
+- Events still fire, tasks still get created — only CLI spawning is blocked
+- Budget is not consumed during pause
+
+### Resume and auto-re-wake
+- **Global resume:** set \`agents_paused\` to \`"false"\` via \`PATCH /settings\`. The framework auto-re-wakes all agents that have pending \`todo\` tasks — no work is lost.
+- **Per-agent resume:** set \`status\` to \`"idle"\` via \`PATCH /agents/:id\`.
+- **Auto-re-wake after run:** after any agent run completes, the engine checks if the agent has remaining \`todo\` tasks. If yes, it auto-re-wakes. This prevents tasks from getting stuck when multiple events coalesce into one run.`,
   },
   {
     id: "auth",
