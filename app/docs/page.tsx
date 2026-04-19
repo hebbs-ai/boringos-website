@@ -348,7 +348,9 @@ app.memory(createHebbsMemory({
 app.connector(slack({ signingSecret: "..." }));
 app.connector(google({ clientId: "...", clientSecret: "..." }));
 
-// Queue — BullMQ for production (in-process by default)
+// Queue — in-process default. Set parallelism via BoringOS config:
+//   new BoringOS({ queue: { concurrency: 4 } })
+// For production, swap in BullMQ:
 app.queue(createBullMQQueue({ redis: "redis://..." }));
 
 // Plugins — extensible jobs + webhooks
