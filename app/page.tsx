@@ -31,7 +31,7 @@ const features = [
   },
   {
     title: "Workflows",
-    description: "DAG engine with 6 block types. Wake agents, call connectors, branch on conditions. Smart routines that check before spawning.",
+    description: "DAG engine with 14 block types and a visual editor. Live SSE updates, replay, side-by-side run diffs, pause-on-human-approval, cross-workflow composition, event triggers.",
     accent: "var(--accent-2)",
   },
   {
@@ -69,7 +69,7 @@ const features = [
 const stats = [
   { value: "14", label: "npm packages" },
   { value: "126", label: "tests passing" },
-  { value: "9", label: "workflow blocks" },
+  { value: "14", label: "workflow blocks" },
   { value: "13", label: "agent personas" },
   { value: "0", label: "config required" },
   { value: "< 1min", label: "to first agent" },

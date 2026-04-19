@@ -194,7 +194,7 @@ Pluggable cognitive memory. Every component ships \`skillMarkdown()\` that teach
 
 ## Workflows
 
-DAG-based execution engine:
+DAG-based execution engine with a visual editor, live run views, replay/diff, and cross-workflow composition.
 
 \`\`\`
 Trigger → Fetch Emails → Condition (any new?)
@@ -202,20 +202,47 @@ Trigger → Fetch Emails → Condition (any new?)
                           └─ false → Skip (save cost)
 \`\`\`
 
-**9 built-in handlers:**
-- \`trigger\` — entry point
-- \`condition\` — true/false branching
-- \`delay\` — wait N milliseconds
-- \`transform\` — map/reshape data
-- \`wake-agent\` — wake an agent from within a workflow (enables "smart routines")
-- \`connector-action\` — call any connector action (e.g., \`list_emails\`, \`list_events\`) with auto credential lookup
-- \`for-each\` — iterate over arrays from previous blocks (e.g., list of emails)
-- \`create-inbox-item\` — store data in inbox (single or batch, supports \`assigneeUserId\`). Used in sync workflows. Emits \`inbox.item_created\` event after creating items.
-- \`emit-event\` — emit connector events so \`routeToInbox()\` and listeners can catch them
+**14 built-in handlers:**
+
+*Triggers / control flow:*
+- \`trigger\` — entry point. Set \`config.eventType: "<event.type>"\` to subscribe to connector events; the framework auto-executes any active workflow whose trigger matches an incoming event.
+- \`condition\` — true/false branching with \`equals\`/\`not_equals\`/\`contains\`/\`truthy\` operators.
+- \`for-each\` — iterate over arrays from upstream blocks.
+- \`delay\` — wait N milliseconds.
+- \`transform\` — map/reshape data via template strings.
+
+*Connectors:*
+- \`connector-action\` — call any connector action (e.g., \`list_emails\`, \`list_events\`) with auto credential lookup.
+- \`create-inbox-item\` — store data in inbox (single or batch, supports \`assigneeUserId\`). Emits \`inbox.item_created\`.
+- \`emit-event\` — emit connector events so \`routeToInbox()\` and listeners can catch them.
+
+*Database (tenant-isolated):*
+- \`query-database\` — read rows from a tenant-scoped table.
+- \`update-row\` — update rows in a tenant-scoped table (requires a where clause).
+- \`create-task\` — create a framework task with assignee, priority, originKind, proposedParams.
+
+*Agents & humans:*
+- \`wake-agent\` — wake an agent from within a workflow (enables "smart routines").
+- \`wait-for-human\` — pause the workflow and create an Actions-queue card. The run resumes when a user approves the card; the workflow continues with the user's input merged into the paused block's output.
+
+*Composition:*
+- \`invoke-workflow\` — run another workflow as a sub-routine. The child's block outputs are merged into this block's output so downstream blocks can reference them. Self-recursion is rejected.
 
 Add custom handlers with \`app.blockHandler()\`.
 
-**Workflow-triggered routines:** Instead of waking an expensive agent on every cron tick, target a workflow that runs cheap checks first and only wakes the agent when needed.
+## Run lifecycle
+
+Every \`engine.execute(workflowId, trigger?, opts?)\` call persists a \`workflow_run\` row plus one \`workflow_block_run\` per block. Pass \`opts.background = true\` so HTTP callers can return the runId immediately and the DAG walks asynchronously — the SSE stream below picks up live transitions.
+
+The engine emits 9 lifecycle events per run: \`run_started\`, \`run_completed\`, \`run_failed\`, \`run_paused\`, plus \`block_started\` / \`block_completed\` / \`block_failed\` / \`block_waiting\` / \`block_skipped\`. They flow into the RealtimeBus as \`workflow:*\` events and out to the UI through the per-run SSE endpoint.
+
+## Pause / resume
+
+Any \`wait-for-human\` block transitions the run to \`waiting_for_human\` and pins it to an Actions-queue task. When the user approves, call \`engine.resume(runId, { userInput })\` (or the \`POST /workflow-runs/:id/resume\` endpoint). The engine reloads the persisted execution state, finalizes the paused block with the merged output, and continues the DAG walk from there.
+
+## Workflow-triggered routines
+
+Instead of waking an expensive agent on every cron tick, target a workflow that runs cheap checks first and only wakes the agent when needed.
 
 ## Syncing External Data (Pattern A)
 
@@ -281,7 +308,18 @@ Ingest workflow -> create-inbox-item -> inbox.item_created event
                                     Wake triage / enrichment agent
 \`\`\`
 
-Events fire immediately when data arrives — zero latency, zero wasted agent runs. Multiple subscribers can react to the same event.`,
+Events fire immediately when data arrives — zero latency, zero wasted agent runs. Multiple subscribers can react to the same event.
+
+**Declarative subscription via workflows:** any active workflow whose entry trigger has \`config.eventType\` matching an incoming event auto-executes — no \`app.onEvent()\` call needed:
+
+\`\`\`typescript
+blocks: [
+  { id: "trigger", type: "trigger", config: { eventType: "inbox.item_created" } },
+  { id: "wake",    type: "wake-agent", config: { agentId: triageAgentId } },
+]
+\`\`\`
+
+The framework's event-dispatch listener queries all active workflows in the event's tenant and fires every match in a microtask, so a slow workflow can't block the bus.`,
   },
   {
     id: "builder-api",
@@ -393,7 +431,7 @@ const server = await app.listen(3000);
 | \`@boringos/memory\` | MemoryProvider interface + hebbs.ai provider + null provider |
 | \`@boringos/drive\` | StorageBackend + DriveManager with file indexing + memory sync |
 | \`@boringos/db\` | Drizzle schema + embedded Postgres + migration manager |
-| \`@boringos/workflow\` | DAG workflow engine + 9 block handlers (incl. wake-agent, connector-action, for-each, create-inbox-item, emit-event) |
+| \`@boringos/workflow\` | DAG workflow engine + 14 block handlers (trigger/condition/for-each/delay/transform, connector-action/create-inbox-item/emit-event, query-database/update-row/create-task, wake-agent/wait-for-human, invoke-workflow). Persisted runs, pause/resume, background mode, lifecycle event sink. |
 | \`@boringos/pipeline\` | QueueAdapter — in-process (default) or BullMQ |
 | \`@boringos/connector\` | Connector SDK — OAuth, events, actions, test harness |
 | \`@boringos/connector-slack\` | Slack — messages, threads, reactions |
@@ -473,6 +511,28 @@ npx create-boringos my-app --full
 | POST | \`/approvals/:id/approve\` | Approve (with optional note) |
 | POST | \`/approvals/:id/reject\` | Reject (with reason) |
 
+## Workflows
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | \`/workflows\` | List workflows |
+| POST | \`/workflows\` | Create workflow |
+| GET | \`/workflows/:id\` | Get workflow |
+| PATCH | \`/workflows/:id\` | Update name / blocks / edges / status / governingAgentId |
+| DELETE | \`/workflows/:id\` | Delete workflow |
+| POST | \`/workflows/:id/execute\` | Execute now (background mode — returns runId immediately, DAG walks asynchronously) |
+| GET | \`/workflows/:id/runs\` | Recent runs scoped to this workflow |
+
+## Workflow runs
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | \`/workflow-runs\` | List runs (cross-workflow) |
+| GET | \`/workflow-runs/:id\` | Run detail with all block runs |
+| POST | \`/workflow-runs/:id/resume\` | Resume a paused run with \`{ userInput }\` (used by the Actions queue) |
+| POST | \`/workflow-runs/:id/replay\` | Re-execute against the current workflow definition using the original trigger payload |
+| GET | \`/workflow-runs/:id/events\` | SSE stream of \`workflow:*\` lifecycle events scoped to one run. Accepts session token via \`?token=\` because EventSource can't set Authorization. |
+
 ## Other endpoints
 
 - **Projects:** \`GET/POST /projects\`, \`GET/PATCH /projects/:id\`
@@ -497,7 +557,7 @@ npx create-boringos my-app --full
 GET /api/events?apiKey=...&tenantId=...
 \`\`\`
 
-Event types: \`run:started\`, \`run:completed\`, \`run:failed\`, \`task:created\`, \`task:updated\`, \`task:comment_added\`, \`agent:created\`, \`approval:decided\`
+Event types: \`run:started\`, \`run:completed\`, \`run:failed\`, \`task:created\`, \`task:updated\`, \`task:comment_added\`, \`agent:created\`, \`approval:decided\`, plus per-run workflow events \`workflow:run_started\`, \`workflow:run_completed\`, \`workflow:run_failed\`, \`workflow:run_paused\`, \`workflow:block_started\`, \`workflow:block_completed\`, \`workflow:block_failed\`, \`workflow:block_waiting\`, \`workflow:block_skipped\`. The per-run \`/workflow-runs/:id/events\` stream filters to the events for one run.
 
 ## Agent Pause
 
