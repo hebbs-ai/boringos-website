@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { HeroCanvas } from "./components/hero-canvas";
 import { AgentOrchestra } from "./components/agent-orchestra";
+import { WorkflowDAG } from "./components/workflow-dag";
 
 const codeExample = `// Create an AI workforce in 5 lines
 
@@ -211,6 +212,41 @@ export default function Home() {
               <div className="w-2 h-2 rounded-full mb-3" style={{ backgroundColor: "var(--accent-3)", boxShadow: "0 0 10px var(--accent-3)" }} />
               <h3 className="font-semibold mb-1">Budget-Enforced</h3>
               <p className="text-sm text-[var(--muted)]">Every agent run has cost tracking. Set limits per agent, per task, per tenant. No runaway spend.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Workflows — visual DAG */}
+      <section className="relative z-10 px-6 py-24 border-t border-[var(--border)]">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-4xl font-bold text-center mb-4">
+            Workflows you can <span style={{ color: "var(--accent-2)" }}>see</span>.
+          </h2>
+          <p className="text-center text-[var(--muted)] mb-12 max-w-2xl mx-auto">
+            DAG-based engine with 14 block types. Persisted runs, live SSE updates, replay,
+            side-by-side diff, pause-on-human-approval, declarative event triggers,
+            cross-workflow composition. Drop the editor in with{" "}
+            <code className="text-xs bg-[var(--code-bg)] text-[var(--code-text)] px-1.5 py-0.5 rounded">@boringos/workflow-ui</code>.
+          </p>
+          <div className="relative bg-[var(--code-bg)] border border-[var(--border)] rounded-2xl overflow-hidden neon-border">
+            <WorkflowDAG />
+          </div>
+          <div className="grid md:grid-cols-3 gap-4 mt-8">
+            <div className="border border-[var(--border)] rounded-xl p-5 bg-[var(--code-bg)] card-hover">
+              <div className="w-2 h-2 rounded-full mb-3" style={{ backgroundColor: "var(--accent-2)", boxShadow: "0 0 10px var(--accent-2)" }} />
+              <h3 className="font-semibold mb-1">Visual editor</h3>
+              <p className="text-sm text-[var(--muted)]">Drag, connect, configure. 14 block types covering triggers, flow control, connectors, DB, agents, humans, composition.</p>
+            </div>
+            <div className="border border-[var(--border)] rounded-xl p-5 bg-[var(--code-bg)] card-hover">
+              <div className="w-2 h-2 rounded-full mb-3" style={{ backgroundColor: "var(--accent)", boxShadow: "0 0 10px var(--accent)" }} />
+              <h3 className="font-semibold mb-1">Live runs</h3>
+              <p className="text-sm text-[var(--muted)]">Every block transition pushes via SSE. Watch your DAG light up — no polling, no reconstruction.</p>
+            </div>
+            <div className="border border-[var(--border)] rounded-xl p-5 bg-[var(--code-bg)] card-hover">
+              <div className="w-2 h-2 rounded-full mb-3" style={{ backgroundColor: "var(--accent-3)", boxShadow: "0 0 10px var(--accent-3)" }} />
+              <h3 className="font-semibold mb-1">Replay &amp; diff</h3>
+              <p className="text-sm text-[var(--muted)]">Re-execute a past run with one click. Compare two runs block-by-block to see exactly what changed.</p>
             </div>
           </div>
         </div>
