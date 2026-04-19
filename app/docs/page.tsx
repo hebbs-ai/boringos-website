@@ -194,7 +194,7 @@ Pluggable cognitive memory. Every component ships \`skillMarkdown()\` that teach
 
 ## Workflows
 
-DAG-based execution engine with a visual editor, live run views, replay/diff, and cross-workflow composition.
+DAG-based execution engine. The framework ships the engine, persistence, lifecycle event stream, replay, pause/resume, and cross-workflow composition. Your app builds the visual editor, canvas, and run-diff UI on top — see the BoringOS CRM for a reference implementation (\`packages/web/src/components/WorkflowCanvas.tsx\`, \`BlockPalette\`, \`BlockConfigForm\`, \`RunDiffView\`).
 
 \`\`\`
 Trigger → Fetch Emails → Condition (any new?)

@@ -31,7 +31,7 @@ const features = [
   },
   {
     title: "Workflows",
-    description: "DAG engine with 14 block types and a visual editor. Live SSE updates, replay, side-by-side run diffs, pause-on-human-approval, cross-workflow composition, event triggers.",
+    description: "DAG engine with 14 block types. Persisted runs, live SSE event stream, replay, pause-on-human-approval, cross-workflow composition, declarative event triggers. Build the visual editor / run diff / canvas on top in your app.",
     accent: "var(--accent-2)",
   },
   {
