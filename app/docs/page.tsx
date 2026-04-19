@@ -218,11 +218,11 @@ Trigger → Fetch Emails → Condition (any new?)
 
 *Database (tenant-isolated):*
 - \`query-database\` — read rows from a tenant-scoped table.
-- \`update-row\` — update rows in a tenant-scoped table (requires a where clause).
-- \`create-task\` — create a framework task with assignee, priority, originKind, proposedParams.
+- \`update-row\` — update rows in a tenant-scoped table (requires a where clause). WHERE supports equality, IN, NULL, and operator objects: \`{ col: { op: "like" | "ilike" | "ne", value } }\`.
+- \`create-task\` — create a framework task with assignee, priority, originKind, proposedParams. Set \`dedup: true\` (with originKind+originId) to skip insert when an open task with the same origin already exists — useful for event-driven workflows that fire repeatedly.
 
 *Agents & humans:*
-- \`wake-agent\` — wake an agent from within a workflow (enables "smart routines").
+- \`wake-agent\` — wake an agent from within a workflow (enables "smart routines"). Accepts \`agentId\` *or* \`agentRole\` — the role form resolves at runtime to the first matching agent in the tenant, so workflows seeded by a framework app stay portable across tenants.
 - \`wait-for-human\` — pause the workflow and create an Actions-queue card. The run resumes when a user approves the card; the workflow continues with the user's input merged into the paused block's output.
 
 *Composition:*
