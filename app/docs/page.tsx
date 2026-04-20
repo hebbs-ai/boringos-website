@@ -434,6 +434,7 @@ const server = await app.listen(3000);
 | \`@boringos/drive\` | StorageBackend + DriveManager with file indexing + memory sync |
 | \`@boringos/db\` | Drizzle schema + embedded Postgres + migration manager |
 | \`@boringos/workflow\` | DAG workflow engine + 14 block handlers (trigger/condition/for-each/delay/transform, connector-action/create-inbox-item/emit-event, query-database/update-row/create-task, wake-agent/wait-for-human, invoke-workflow). Persisted runs, pause/resume, background mode, lifecycle event sink. |
+| \`@boringos/workflow-ui\` | React components for workflows — \`WorkflowCanvas\` (xyflow + dagre auto-layout), \`BlockPalette\`, \`BlockConfigForm\`, \`RunDiffView\`, plus SSE-driven hooks (\`useWorkflow\`, \`useWorkflowRun\`). Drop-in companion to @boringos/workflow. |
 | \`@boringos/pipeline\` | QueueAdapter — in-process (default) or BullMQ |
 | \`@boringos/connector\` | Connector SDK — OAuth, events, actions, test harness |
 | \`@boringos/connector-slack\` | Slack — messages, threads, reactions |
