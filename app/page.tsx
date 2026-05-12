@@ -387,6 +387,82 @@ export default function Home() {
         </div>
       </section>
 
+      {/* SAFETY — Drive ACL story */}
+      <section className="relative z-10 px-6 py-24 border-t border-[var(--border)]">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="inline-block px-3 py-1 border border-[var(--accent-2)] rounded-full text-[10px] uppercase tracking-widest mb-4" style={{ color: "var(--accent-2)" }}>
+              Built-in isolation
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              Autonomy without the <span style={{ color: "var(--accent-2)" }}>blast radius.</span>
+            </h2>
+            <p className="text-[var(--muted)] max-w-2xl mx-auto">
+              Agents run with <code className="text-xs bg-[var(--code-bg)] px-1.5 py-0.5 rounded">--dangerously-skip-permissions</code> so they don&apos;t stop to ask. That&apos;s safe because every byte they read or write goes through Drive — our proxy over the filesystem. Tenants can&apos;t see each other. Users keep private files private. Agents can&apos;t write to each other&apos;s drafts.
+            </p>
+          </div>
+
+          {/* Namespace tree visual */}
+          <div className="relative max-w-3xl mx-auto mb-12">
+            <div className="absolute -inset-2 rounded-2xl blur-xl opacity-[0.06]" style={{ background: "var(--accent-2)" }} />
+            <div className="relative bg-[var(--code-bg)] border border-[var(--border)] rounded-2xl overflow-hidden neon-border">
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-[var(--border)]">
+                <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
+                <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
+                <div className="w-3 h-3 rounded-full bg-[#28c840]" />
+                <span className="ml-2 text-xs text-[var(--muted)]">drive namespace · tenant=&lt;tenantId&gt;</span>
+              </div>
+              <pre className="p-6 overflow-x-auto text-sm leading-relaxed font-mono">
+                <code>
+{`<tenantId>/                  `}<span style={{ color: "var(--accent-2)" }}>{`# isolation root — you cannot escape it`}</span>{`
+├── shared/...               `}<span className="text-[var(--muted)]">{`# tenant-wide   · agents read+write`}</span>{`
+├── users/<userId>/...       `}<span style={{ color: "var(--accent-3)" }}>{`# PRIVATE       · agents denied (drive-acl.ts:239)`}</span>{`
+├── agents/<agentId>/...     `}<span className="text-[var(--muted)]">{`# agent home    · own=rw · others=read-only`}</span>{`
+├── tasks/<taskId>/...       `}<span className="text-[var(--muted)]">{`# deliverables  · tenant-shared`}</span>{`
+└── projects/<projectId>/... `}<span className="text-[var(--muted)]">{`# long-running  · tenant-shared`}</span>
+                </code>
+              </pre>
+            </div>
+          </div>
+
+          {/* ACL property cards */}
+          <div className="grid md:grid-cols-2 gap-4">
+            {[
+              {
+                title: "Tenant isolation, structural",
+                desc: "Every path is prefixed with the tenant id at the storage layer (manager.ts:56). There is no code path that reads or writes outside the tenant root. Path traversal — .., absolute paths, percent-encoded escapes — rejected before the storage call.",
+                accent: "var(--accent-2)",
+              },
+              {
+                title: "User space is genuinely private",
+                desc: "users/<id>/ returns 'users/<id>/ is private — not accessible to agents' on every agent attempt. It is not a permission you forgot to set — it is the default, in the type system, with a literal error string you can grep.",
+                accent: "var(--accent-3)",
+              },
+              {
+                title: "Per-agent ACLs",
+                desc: "Agents can read each other's working drafts (transparency by default) but can only write to their own agents/<id>/ folder. Cross-agent writes return 'agent may only write to its own agents/<id>/ folder' — enforced before storage, not after.",
+                accent: "var(--accent)",
+              },
+              {
+                title: "Every byte goes through Drive",
+                desc: "Reads, writes, lists, deletes — all go through DriveManager. That means tenant scoping, ACL check, audit row, event fan-out, memory-sync index, every time. No side door.",
+                accent: "var(--accent-2)",
+              },
+            ].map((p) => (
+              <div key={p.title} className="border border-[var(--border)] rounded-2xl p-6 bg-[var(--code-bg)] card-hover">
+                <div className="w-2 h-2 rounded-full mb-3" style={{ backgroundColor: p.accent, boxShadow: `0 0 10px ${p.accent}` }} />
+                <h3 className="font-semibold mb-2">{p.title}</h3>
+                <p className="text-sm text-[var(--muted)] leading-relaxed">{p.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 text-center text-sm text-[var(--muted)] max-w-2xl mx-auto">
+            The agent has full power inside its lane. The lane is the load-bearing part. Source: <code className="text-xs bg-[var(--code-bg)] px-1.5 py-0.5 rounded">@boringos/core/src/modules/drive-acl.ts</code>.
+          </div>
+        </div>
+      </section>
+
       {/* Agent Orchestra — the sexy visual */}
       <section className="relative z-10 px-6 py-24 border-t border-[var(--border)]">
         <div className="max-w-5xl mx-auto">
