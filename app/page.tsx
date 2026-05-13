@@ -195,16 +195,49 @@ export default function Home() {
             <span style={{ color: "var(--accent)" }}>Anyone can ship one. Install with a click.</span>
           </p>
 
-          <div className="flex items-center justify-center gap-4 mb-20">
+          {/* PRIMARY: the prompt to deploy the shell */}
+          <div className="max-w-3xl mx-auto mb-6">
+            <div className="text-[10px] uppercase tracking-widest text-[var(--muted)] mb-2 text-left">
+              60 seconds to your own agentic OS — paste this into Cursor, Claude Code, Codex, or Gemini CLI inside any empty folder
+            </div>
+            <div className="relative group">
+              <div className="absolute -inset-1 rounded-2xl blur-xl opacity-30 group-hover:opacity-60 transition-opacity" style={{ background: "var(--accent)" }} />
+              <div className="relative bg-[var(--code-bg)] border-2 rounded-2xl p-5 flex items-center gap-4" style={{ borderColor: "var(--accent)", boxShadow: "0 0 40px var(--glow)" }}>
+                <div className="text-2xl shrink-0 opacity-60">›</div>
+                <div className="flex-1 text-left font-mono text-base md:text-lg" style={{ color: "var(--accent)" }}>
+                  deploy boringos shell on my localhost
+                </div>
+                <button
+                  type="button"
+                  className="shrink-0 text-[10px] uppercase tracking-widest px-3 py-1.5 border border-[var(--border)] rounded-full text-[var(--muted)] hover:text-[var(--accent)] hover:border-[var(--accent)] transition-all"
+                  aria-label="Copy prompt"
+                >
+                  copy
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Secondary CTA row */}
+          <div className="flex items-center justify-center gap-4 mb-4">
             <Link
               href="/docs"
               className="px-8 py-3.5 bg-[var(--accent)] text-[var(--background)] rounded-lg font-semibold text-sm hover:shadow-[0_0_30px_var(--glow)] transition-all"
             >
-              Get Started
+              Read the docs
             </Link>
-            <div className="px-5 py-3.5 bg-[var(--code-bg)] border border-[var(--border)] rounded-lg font-mono text-sm neon-border">
-              <span className="text-[var(--muted)]">$</span> npx create-boringos my-app
-            </div>
+            <a
+              href="https://github.com/BoringOS-dev/boringos"
+              className="px-8 py-3.5 border border-[var(--border)] rounded-lg font-semibold text-sm hover:border-[var(--accent)] hover:shadow-[0_0_20px_var(--glow)] transition-all"
+            >
+              Clone the repo
+            </a>
+          </div>
+
+          {/* Quiet line for custom builders */}
+          <div className="text-xs text-[var(--muted)] mb-20 opacity-70">
+            Building a fully custom agentic product?{" "}
+            <code className="bg-[var(--code-bg)] border border-[var(--border)] px-1.5 py-0.5 rounded font-mono">npx create-boringos my-app</code>
           </div>
 
           {/* Code block with glow */}
@@ -583,33 +616,77 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Zero config */}
+      {/* 60 seconds to the shell — the hero quickstart */}
       <section className="relative z-10 px-6 py-24 border-t border-[var(--border)]">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-4">
-            Zero config. <span style={{ color: "var(--accent)" }}>Seriously.</span>
-          </h2>
-          <p className="text-[var(--muted)] mb-12">One line boots the entire platform. Embedded Postgres included. Built-in Modules auto-register.</p>
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="inline-block px-3 py-1 border rounded-full text-[10px] uppercase tracking-widest mb-4" style={{ borderColor: "var(--accent)", color: "var(--accent)" }}>
+              ~60 seconds · one prompt
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              Your own agentic OS,<br />
+              <span style={{ color: "var(--accent)" }}>running on your laptop.</span>
+            </h2>
+            <p className="text-[var(--muted)] max-w-2xl mx-auto">
+              You don&apos;t install BoringOS. You tell your coding agent to. Open Cursor / Claude Code / Codex / Gemini CLI inside any empty folder, paste the prompt — it clones, installs, builds, boots Postgres, and brings up the shell at localhost:3000.
+            </p>
+          </div>
 
-          <div className="inline-block text-left">
-            <div className="bg-[var(--code-bg)] border border-[var(--border)] rounded-2xl p-6 neon-border font-mono text-sm">
-              <div className="text-[var(--muted)]">$ npx create-boringos my-startup</div>
-              <div className="text-[var(--muted)]">$ npm run dev</div>
-              <div className="mt-3 text-[var(--accent)]">
-                ✓ Embedded Postgres started<br/>
-                ✓ Registered 9 built-in modules<br/>
-                ✓ Server running at http://localhost:3000<br/>
+          {/* Big prompt panel */}
+          <div className="relative max-w-3xl mx-auto mb-10">
+            <div className="absolute -inset-2 rounded-2xl blur-2xl opacity-[0.18]" style={{ background: "var(--accent)" }} />
+            <div className="relative bg-[var(--code-bg)] border-2 rounded-2xl overflow-hidden" style={{ borderColor: "var(--accent)" }}>
+              <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--border)]">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
+                  <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
+                  <div className="w-3 h-3 rounded-full bg-[#28c840]" />
+                  <span className="ml-2 text-xs text-[var(--muted)]">Cursor / Claude Code / Codex / Gemini CLI</span>
+                </div>
+                <span className="text-[10px] uppercase tracking-widest text-[var(--muted)]">prompt</span>
               </div>
-              <div className="mt-3 text-[var(--muted)]">$ curl -X POST /api/admin/modules/install \</div>
-              <div className="text-[var(--muted)]">{"  "}-F file=@hebbs-crm-0.3.0.hebbsmod</div>
-              <div className="mt-3 text-[var(--accent)]">
-                ✓ Verified signature (Ed25519)<br/>
-                ✓ Applied schema (3 tables)<br/>
-                ✓ Registered 7 tools<br/>
-                ✓ Loaded 4 skills into agent prompt<br/>
-                <br/>
-                <span className="text-white font-semibold">Your agents now know CRM. Open the shell.</span>
+              <div className="px-6 py-8 flex items-center gap-4">
+                <div className="text-3xl shrink-0 opacity-50">›</div>
+                <div className="flex-1 font-mono text-lg md:text-2xl" style={{ color: "var(--accent)" }}>
+                  deploy boringos shell on my localhost
+                </div>
               </div>
+              <div className="px-6 pb-6 font-mono text-xs leading-relaxed border-t border-[var(--border)] pt-4" style={{ color: "var(--accent)", opacity: 0.85 }}>
+                <div className="text-[var(--muted)] mb-2 not-italic">→ agent runs:</div>
+                ✓ Cloned github.com/BoringOS-dev/boringos<br/>
+                ✓ Installed 947 packages<br/>
+                ✓ Built 14 workspace packages<br/>
+                ✓ Embedded Postgres started on :54321<br/>
+                ✓ Registered 9 built-in Modules<br/>
+                ✓ Shell live at <span className="underline">http://localhost:3000</span>
+                <div className="mt-3 text-white font-semibold not-italic">
+                  Open the shell. Sign up. Start talking to your agents.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Pillars */}
+          <div className="grid md:grid-cols-3 gap-4 mb-12">
+            {[
+              { title: "Works with your agent", desc: "Cursor, Claude Code, Codex, Gemini CLI, Aider — any agentic coding tool. The prompt is the install script." },
+              { title: "Embedded Postgres", desc: "No Docker. No external DB. No Redis. Boot once, you have an admin API, a tool registry, an SSE bus, a queue." },
+              { title: "Everything pre-wired", desc: "Inbox, Drive, Workflows, Agents, Copilot, Modules screen — all the built-in Modules already registered, all UI live." },
+            ].map((p) => (
+              <div key={p.title} className="border border-[var(--border)] rounded-xl p-5 bg-[var(--code-bg)] card-hover">
+                <div className="w-2 h-2 rounded-full mb-3" style={{ backgroundColor: "var(--accent)", boxShadow: "0 0 10px var(--accent)" }} />
+                <h3 className="font-semibold mb-1">{p.title}</h3>
+                <p className="text-xs text-[var(--muted)] leading-relaxed">{p.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Quiet escape hatch for custom builders */}
+          <div className="border-t border-[var(--border)] pt-8 mt-4">
+            <div className="text-center text-sm text-[var(--muted)] max-w-2xl mx-auto">
+              <span className="opacity-60">Want a blank slate instead — shipping a fully custom agentic product on top of BoringOS?</span>{" "}
+              Scaffold your own host:{" "}
+              <code className="bg-[var(--code-bg)] border border-[var(--border)] px-2 py-0.5 rounded font-mono text-xs text-[var(--accent-3)]">npx create-boringos my-app</code>
             </div>
           </div>
         </div>
@@ -715,28 +792,46 @@ export default function Home() {
         <div className="relative">
           <h2 className="text-5xl font-bold mb-4">
             The boring parts are handled.<br />
-            <span style={{ color: "var(--accent)" }}>Go ship a Module.</span>
+            <span style={{ color: "var(--accent)" }}>Stop reading. Ship it.</span>
           </h2>
-          <p className="text-[var(--muted)] mb-10 text-lg">From zero to first agent in under a minute. From first Module to install in an hour.</p>
+          <p className="text-[var(--muted)] mb-10 text-lg">One prompt. One minute. Your own agentic OS on localhost.</p>
+
+          {/* Big prompt CTA */}
+          <div className="relative max-w-2xl mx-auto mb-8">
+            <div className="absolute -inset-2 rounded-2xl blur-xl opacity-30" style={{ background: "var(--accent)" }} />
+            <div className="relative bg-[var(--code-bg)] border-2 rounded-2xl px-6 py-5 flex items-center gap-4" style={{ borderColor: "var(--accent)" }}>
+              <div className="text-2xl shrink-0 opacity-60">›</div>
+              <div className="flex-1 text-left font-mono text-base md:text-lg" style={{ color: "var(--accent)" }}>
+                deploy boringos shell on my localhost
+              </div>
+              <span className="text-[10px] uppercase tracking-widest text-[var(--muted)] shrink-0 hidden md:block">paste in your AI coding tool</span>
+            </div>
+          </div>
+
           <div className="flex items-center justify-center gap-4 flex-wrap">
+            <a
+              href="https://github.com/BoringOS-dev/boringos"
+              className="px-8 py-4 bg-[var(--accent)] text-[var(--background)] rounded-lg font-semibold hover:shadow-[0_0_40px_var(--glow)] transition-all"
+            >
+              Clone the repo
+            </a>
             <Link
               href="/docs"
-              className="px-8 py-4 bg-[var(--accent)] text-[var(--background)] rounded-lg font-semibold hover:shadow-[0_0_40px_var(--glow)] transition-all"
+              className="px-8 py-4 border border-[var(--border)] rounded-lg font-semibold hover:border-[var(--accent)] hover:shadow-[0_0_20px_var(--glow)] transition-all"
             >
               Read the docs
             </Link>
-            <a
-              href="https://github.com/BoringOS-dev/boringos"
-              className="px-8 py-4 border border-[var(--border)] rounded-lg font-semibold hover:border-[var(--accent)] hover:shadow-[0_0_20px_var(--glow)] transition-all"
-            >
-              View on GitHub
-            </a>
             <a
               href="https://github.com/hebbs-ai/hebbs-crm"
               className="px-8 py-4 border border-[var(--border)] rounded-lg font-semibold hover:border-[var(--accent-3)] transition-all"
             >
               Read a real Module
             </a>
+          </div>
+
+          <div className="mt-10 text-xs text-[var(--muted)] opacity-60">
+            Building a fully custom agentic product instead?{" "}
+            <code className="bg-[var(--code-bg)] border border-[var(--border)] px-1.5 py-0.5 rounded font-mono">npx create-boringos my-app</code>
           </div>
         </div>
       </section>
