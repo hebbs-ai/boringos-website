@@ -3,46 +3,6 @@ import { HeroCanvas } from "./components/hero-canvas";
 import { AgentOrchestra } from "./components/agent-orchestra";
 import { WorkflowDAG } from "./components/workflow-dag";
 
-const codeExample = `// One primitive: the Module.
-// Skills + Tools, bundled. Registered in one call.
-
-import { BoringOS } from "@boringos/core";
-import { z } from "@boringos/module-sdk";
-import type { Module } from "@boringos/module-sdk";
-
-const crm: Module = {
-  id: "crm",
-  name: "Tiny CRM",
-  version: "0.1.0",
-  description: "Deals + contacts the agent can reason about",
-
-  skills: [{
-    id: "crm-intro",
-    source: "module",
-    body: "Use crm.list_deals before crm.move_stage. " +
-          "Always confirm the stage with the user.",
-  }],
-
-  tools: [{
-    name: "list_deals",
-    description: "List all deals for the tenant",
-    inputs: z.object({ status: z.string().optional() }),
-    async handler({ status }, ctx) {
-      const rows = await ctx.db.query.deals.findMany({
-        where: { tenantId: ctx.tenantId, status },
-      });
-      return { ok: true, result: { deals: rows } };
-    },
-  }],
-};
-
-const app = new BoringOS({});
-app.module(crm);
-await app.listen(3000);
-
-// The agent's prompt now includes crm's Skills.
-// POST /api/tools/crm.list_deals is live. That's it.`;
-
 const primitives = [
   {
     title: "Skills",
@@ -240,19 +200,61 @@ export default function Home() {
             <code className="bg-[var(--code-bg)] border border-[var(--border)] px-1.5 py-0.5 rounded font-mono">npx create-boringos my-app</code>
           </div>
 
-          {/* Code block with glow */}
+          {/* Hero code window — the .hebbsmod ship-it flow */}
           <div className="text-left max-w-3xl mx-auto relative">
-            <div className="absolute -inset-4 bg-[var(--accent)] opacity-[0.03] rounded-2xl blur-xl" />
+            <div className="absolute -inset-4 bg-[var(--accent)] opacity-[0.04] rounded-2xl blur-xl" />
             <div className="relative bg-[var(--code-bg)] border border-[var(--border)] rounded-2xl overflow-hidden neon-border">
+
+              {/* Window chrome */}
               <div className="flex items-center gap-2 px-4 py-3 border-b border-[var(--border)]">
                 <div className="w-3 h-3 rounded-full bg-[#ff5f57]" />
                 <div className="w-3 h-3 rounded-full bg-[#febc2e]" />
                 <div className="w-3 h-3 rounded-full bg-[#28c840]" />
-                <span className="ml-2 text-xs text-[var(--muted)]">crm-module.ts</span>
+                <span className="ml-2 text-xs text-[var(--muted)] font-mono">crm-0.3.0.hebbsmod</span>
+                <div className="ml-auto flex items-center gap-2 text-[10px] uppercase tracking-widest" style={{ color: "var(--accent-3)" }}>
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--accent-3)", boxShadow: "0 0 8px var(--accent-3)" }} />
+                  signed · 1.4 MB
+                </div>
               </div>
-              <pre className="p-6 overflow-x-auto text-sm leading-relaxed">
-                <code className="text-[var(--code-text)]">{codeExample}</code>
-              </pre>
+
+              {/* 1. Bundle layout */}
+              <div className="px-6 pt-5 pb-4 font-mono text-[11px] md:text-xs leading-relaxed">
+                <div className="text-[var(--muted)] mb-2"># one zip — skills, tools, schema, UI, lifecycle, signature</div>
+                <pre className="overflow-x-auto whitespace-pre">
+<span style={{ color: "var(--accent)" }}>crm-0.3.0.hebbsmod</span>{"\n"}
+<span className="text-[var(--code-text)]">├── </span><span style={{ color: "var(--accent-2)" }}>module.json</span>             <span className="text-[var(--muted)]"># id, version, kind, ui entry, publisher</span>{"\n"}
+<span className="text-[var(--code-text)]">├── </span><span style={{ color: "var(--accent-2)" }}>index.mjs</span>               <span className="text-[var(--muted)]"># bundled Module — tools + skills + lifecycle</span>{"\n"}
+<span className="text-[var(--code-text)]">├── </span><span style={{ color: "var(--accent-2)" }}>skills/deals.md</span>         <span className="text-[var(--muted)]"># injected into the agent prompt on wake</span>{"\n"}
+<span className="text-[var(--code-text)]">├── </span><span style={{ color: "var(--accent-2)" }}>migrations/0001_init.sql</span>  <span className="text-[var(--muted)]"># per-tenant Drizzle</span>{"\n"}
+<span className="text-[var(--code-text)]">├── </span><span style={{ color: "var(--accent-2)" }}>ui/index.mjs</span>            <span className="text-[var(--muted)]"># React surface, hot-loaded at /modules/crm/ui</span>{"\n"}
+<span className="text-[var(--code-text)]">└── </span><span style={{ color: "var(--accent-3)" }}>signature</span>               <span className="text-[var(--muted)]"># Ed25519 over manifest + code + ui</span>
+                </pre>
+              </div>
+
+              {/* 2. Upload command */}
+              <div className="px-6 py-4 border-t border-[var(--border)] font-mono text-[11px] md:text-xs leading-relaxed">
+                <div className="text-[var(--muted)] mb-2"># drop it on the shell&apos;s Apps screen — or one curl:</div>
+                <pre className="overflow-x-auto whitespace-pre">
+<span className="text-[var(--muted)]">$ </span><span style={{ color: "var(--accent)" }}>curl</span> -F file=@<span style={{ color: "var(--accent-2)" }}>crm-0.3.0.hebbsmod</span> \{"\n"}
+{"     "}-H <span style={{ color: "var(--accent-2)" }}>&quot;X-API-Key: $KEY&quot;</span> \{"\n"}
+{"     "}<span style={{ color: "var(--accent-3)" }}>https://your-host/api/admin/modules/upload</span>
+                </pre>
+              </div>
+
+              {/* 3. Host activation log */}
+              <div className="px-6 py-4 border-t border-[var(--border)] font-mono text-[11px] md:text-xs leading-relaxed" style={{ background: "#06060e" }}>
+                <div className="text-[var(--muted)] mb-2"># the host:</div>
+                <div style={{ color: "var(--accent)" }}>
+                  ✓ Verified Ed25519 signature <span className="text-[var(--muted)]">(publisher: hebbs)</span><br />
+                  ✓ Migrated 3 tables <span className="text-[var(--muted)]">· crm__deals · crm__contacts · crm__activities</span><br />
+                  ✓ Registered 7 tools <span className="text-[var(--muted)]">at /api/tools/crm.*</span><br />
+                  ✓ Loaded 4 skills <span className="text-[var(--muted)]">into the agent prompt</span><br />
+                  ✓ Mounted UI <span className="text-[var(--muted)]">at /modules/crm/ui/* — sidebar updated via SSE</span>
+                </div>
+                <div className="mt-3 text-white font-semibold">
+                  Your agents now know CRM. <span style={{ color: "var(--accent)" }}>Open the shell.</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
