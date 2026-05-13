@@ -35,6 +35,8 @@ export function HeroCanvas() {
     const PAC_COLORS = [
       [255, 230, 60],   // classic yellow
       [0, 255, 136],    // BoringOS green
+      [255, 140, 40],   // tangerine
+      [180, 230, 255],  // ice blue
     ];
 
     const GHOST_COLORS = [
@@ -42,6 +44,8 @@ export function HeroCanvas() {
       [255, 150, 200],  // Pinky
       [80, 220, 255],   // Inky (cyan)
       [255, 170, 70],   // Clyde (orange)
+      [140, 100, 255],  // Funky (purple)
+      [180, 240, 110],  // Sue (lime)
     ];
 
     const FRIGHTENED = [60, 110, 255];
@@ -295,7 +299,7 @@ export function HeroCanvas() {
       pacs = [];
       ghosts = [];
 
-      const numPacs = Math.min(PAC_COLORS.length, Math.max(1, Math.floor(cols / 30) + 1));
+      const numPacs = Math.min(PAC_COLORS.length, Math.max(2, Math.floor(cols / 25) + 1));
       for (let i = 0; i < numPacs; i++) {
         const [c, r] = randomPathCell();
         pacs.push({
@@ -315,14 +319,19 @@ export function HeroCanvas() {
 
       const homeCol = Math.floor(cols / 2);
       const homeRow = Math.floor(rows / 2);
+      const lo = (frac: number, max: number) => Math.max(1, Math.min(max - 2, Math.floor(max * frac)));
+      // 6 scatter targets — four corners + two mid-edge anchors so the
+      // extra ghosts don't pile up on top of each other.
       const corners: Array<[number, number]> = [
-        [Math.max(1, Math.floor(cols * 0.08)), Math.max(1, Math.floor(rows * 0.08))],
-        [Math.min(cols - 2, Math.floor(cols * 0.92)), Math.max(1, Math.floor(rows * 0.08))],
-        [Math.max(1, Math.floor(cols * 0.08)), Math.min(rows - 2, Math.floor(rows * 0.92))],
-        [Math.min(cols - 2, Math.floor(cols * 0.92)), Math.min(rows - 2, Math.floor(rows * 0.92))],
+        [lo(0.08, cols), lo(0.08, rows)],
+        [lo(0.92, cols), lo(0.08, rows)],
+        [lo(0.08, cols), lo(0.92, rows)],
+        [lo(0.92, cols), lo(0.92, rows)],
+        [lo(0.50, cols), lo(0.08, rows)],
+        [lo(0.50, cols), lo(0.92, rows)],
       ];
 
-      const numGhosts = Math.min(GHOST_COLORS.length, Math.max(2, Math.floor(cols / 22)));
+      const numGhosts = Math.min(GHOST_COLORS.length, Math.max(3, Math.floor(cols / 16) + 1));
       for (let i = 0; i < numGhosts; i++) {
         const [c, r] = randomPathCell();
         ghosts.push({
@@ -335,8 +344,8 @@ export function HeroCanvas() {
           color: GHOST_COLORS[i],
           baseColor: GHOST_COLORS[i],
           mode: "scatter",
-          scatterCol: corners[i][0],
-          scatterRow: corners[i][1],
+          scatterCol: corners[i % corners.length][0],
+          scatterRow: corners[i % corners.length][1],
           homeCol,
           homeRow,
         });
