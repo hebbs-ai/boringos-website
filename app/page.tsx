@@ -200,6 +200,17 @@ export default function Home() {
             <code className="bg-[var(--code-bg)] border border-[var(--border)] px-1.5 py-0.5 rounded font-mono">npx create-boringos my-app</code>
           </div>
 
+          {/* Section label — framing the .hebbsmod story */}
+          <div className="text-center max-w-3xl mx-auto mb-5">
+            <div className="inline-flex items-center gap-2 px-3 py-1 border border-[var(--border)] rounded-full text-[10px] uppercase tracking-widest text-[var(--muted)]">
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--accent)", boxShadow: "0 0 8px var(--accent)" }} />
+              Install any 3rd-party module built for BoringOS
+            </div>
+            <p className="text-sm text-[var(--muted)] mt-3 leading-relaxed">
+              Drag a <code className="text-xs bg-[var(--code-bg)] border border-[var(--border)] px-1.5 py-0.5 rounded font-mono" style={{ color: "var(--accent)" }}>.hebbsmod</code> onto the shell&apos;s Apps screen. Signed bundle, schema migrated, tools registered, UI hot-mounted — your agents know the new domain on the next wake.
+            </p>
+          </div>
+
           {/* Hero code window — the .hebbsmod ship-it flow */}
           <div className="text-left max-w-3xl mx-auto relative">
             <div className="absolute -inset-4 bg-[var(--accent)] opacity-[0.04] rounded-2xl blur-xl" />
