@@ -790,6 +790,167 @@ unsubscribe();
 \`\`\``,
   },
   {
+    id: "budgeting-controls",
+    title: "Budgeting & Cost Controls",
+    content: `BoringOS treats budget enforcement as a runtime primitive, not a reporting afterthought.
+
+## Scope your budget policies
+
+Apply controls at multiple levels:
+- Tenant-wide default caps
+- Agent-specific limits for expensive roles
+- Task-level ceilings for high-risk work
+- Workflow-level policies for automation loops
+
+Use stricter defaults for autonomous routines and looser caps for human-approved flows.
+
+## Guardrail modes
+
+- **Hard stop:** immediately halt work when spend limit is reached
+- **Soft alert:** allow completion but emit incident + alert event
+- **Approval gate:** require a human decision before crossing a threshold
+
+## Operational endpoints
+
+Budget APIs are available under the admin surface:
+- \`GET /api/admin/budgets\`
+- \`POST /api/admin/budgets\`
+- \`DELETE /api/admin/budgets/:id\`
+- \`GET /api/admin/budgets/incidents\`
+- \`GET /api/admin/costs\`
+
+## Incident handling pattern
+
+1. Detect overrun via budget incidents
+2. Inspect run/task context and tool calls
+3. Adjust runtime routing (quality/cost policy)
+4. Resume with tighter caps or approval gates`,
+  },
+  {
+    id: "auditability-compliance",
+    title: "Auditability & Compliance",
+    content: `Every meaningful action in BoringOS can be traced and reviewed.
+
+## What gets audited
+
+- Agent wakeups and run lifecycle transitions
+- Tool invocations with validated input/output context
+- Task comments, assignments, and approvals
+- Workflow block execution state changes
+- Budget incidents and control decisions
+
+## Why this matters
+
+Auditability powers:
+- Root-cause analysis for failures
+- Internal governance and security reviews
+- Customer diligence and enterprise procurement
+- Replay-driven debugging ("what exactly happened?")
+
+## Evidence flow
+
+\`\`\`
+Task/Event -> Agent/Workflow action -> Tool call -> Persisted run + event stream
+                   -> Approval/Budget decision -> Full timeline for export/review
+\`\`\`
+
+## Recommended practice
+
+Keep policy decisions close to execution:
+- Use workflow checkpoints for risky actions
+- Record explicit reason strings on approvals/rejections
+- Treat budget incidents as first-class operations events`,
+  },
+  {
+    id: "runtime-routing",
+    title: "Runtime Routing (Any Agent, Any Task)",
+    content: `BoringOS supports heterogeneous runtime execution with one orchestration layer.
+
+## Built-in runtime adapters
+
+- \`claude\` (Claude Code CLI)
+- \`chatgpt\` (OpenAI Codex CLI)
+- \`gemini\` (Gemini CLI)
+- \`ollama\` (local model runtime)
+- \`command\` (custom subprocess)
+- \`webhook\` (external execution service)
+
+## Routing strategies
+
+Use assignment policies based on:
+- Cost sensitivity (cheaper-first route)
+- Latency requirements (fastest-first route)
+- Quality requirements (best-model route)
+- Data residency constraints (local/private route)
+
+## Resilience patterns
+
+- Configure fallback chains per workflow path
+- Re-route after failures without losing task context
+- Keep skills/tools stable while swapping runtime backends
+
+This lets teams optimize for both capability and cost while staying vendor-flexible.`,
+  },
+  {
+    id: "policy-approvals",
+    title: "Policy Engine & Human Approvals",
+    content: `Autonomy works best with explicit checkpoints for risky transitions.
+
+## Human-in-the-loop blocks
+
+Use \`wait-for-human\` inside workflows to pause execution and collect approval input before continuing.
+
+When approved:
+- Workflow resumes with merged user input
+- Downstream blocks continue from persisted state
+
+## Practical checkpoint examples
+
+- Deploying to production
+- Exceeding normal budget thresholds
+- Sending customer-facing comms at scale
+- Applying broad data mutations
+
+## Policy layering
+
+Combine multiple controls:
+1. Budget policy (cost boundary)
+2. Workflow checkpoint (human gate)
+3. Role policy in app routes (authorization)
+
+This provides controlled autonomy without forcing humans into every low-risk action.`,
+  },
+  {
+    id: "evals-scorecards",
+    title: "Evals, Scorecards, and Regression Checks",
+    content: `Reliable agent systems need continuous measurement.
+
+## Evals API
+
+- \`GET /api/admin/evals\`
+- \`POST /api/admin/evals\`
+- \`POST /api/admin/evals/:id/run\`
+- \`GET /api/admin/evals/:id/runs\`
+
+## What to measure
+
+- Success/failure rate by task type
+- Cost per successful outcome
+- Retry rate and recovery behavior
+- Latency percentile by runtime/model
+- Human override frequency
+
+## Scorecard loop
+
+\`\`\`
+Define eval -> run against candidate change -> compare baseline metrics
+-> approve or rollback -> publish updated routing/policy
+\`\`\`
+
+Treat evals as a release gate for runtime changes, prompt updates, and policy tweaks.`,
+  },
+  {
+    id: "copilot",
     title: "Copilot",
     content: `Every BoringOS app ships with a built-in **copilot** — a conversational AI assistant that can both **operate** your system (manage tasks, agents, data) and **build** new features (edit code, add integrations). The copilot is **multi-tenant** — it resolves the tenant from the session token and a copilot agent is auto-created for each new tenant on signup.
 

@@ -41,54 +41,77 @@ const builtInModules = [
 
 const features = [
   {
-    title: "Agent Execution",
-    description: "6 CLI runtimes (Claude, Codex, Gemini, Ollama, raw command, webhook). 15 personas. Org hierarchy with delegation, escalation, next-actor handoff state machine.",
+    title: "Budget Control Plane",
+    description: "Define spend caps by tenant, workflow, agent, or task. Choose hard stops or soft alerts, inspect incidents, and keep autonomous execution inside guardrails.",
     accent: "var(--accent)",
   },
   {
-    title: "Workflows",
-    description: "DAG engine that dispatches every node through the tool registry. Persisted runs, live SSE, replay, fork-from-here, pause-on-human-approval, smart routines that only wake agents when there's real work.",
+    title: "Audit Ledger",
+    description: "Every tool call, mutation, approval, and run transition is logged with actor, timestamp, and payload context. Replay and forensic traceability come built in.",
     accent: "var(--accent-2)",
   },
   {
-    title: "Module Ecosystem",
-    description: ".hebbsmod packages — one zip, signed, content-addressed. Upload from the shell, install per-tenant, hot-register without restart. The same shape Slack + Google + CRM use.",
+    title: "Runtime Router",
+    description: "Route tasks to Claude, Codex, Gemini, Ollama, command, or webhook runtimes. Set quality/cost/speed policy and automatic fallback chains per workload.",
     accent: "var(--accent-3)",
   },
   {
-    title: "Memory",
-    description: "Agents remember. Agents recall. Agents learn across runs. Pluggable provider — hebbs.ai out of the box, or bring your own cognitive engine.",
+    title: "Policy + Human Checkpoints",
+    description: "Pause-on-approval and wait-for-human blocks create safe handoffs for high-risk actions, while still letting low-risk paths run autonomously.",
     accent: "var(--accent)",
   },
   {
-    title: "Admin API",
-    description: "REST for everything — agents, tasks, runs, approvals, budgets, routines, plugins, modules. JWT + session auth. SSE realtime bus. Anthropic cache tokens tracked end-to-end.",
+    title: "Evals + Scorecards",
+    description: "Track success rate, retries, cost-per-outcome, and regression risk across agent changes. Compare runs and tighten quality before production rollout.",
     accent: "var(--accent-2)",
   },
   {
-    title: "Headless UI",
-    description: "Typed API client + React hooks for everything. useAgents, useTasks, useRuns. No opinions on your markup. Build any dashboard, or use the shipped shell.",
+    title: "Compliance Exports",
+    description: "Generate evidence bundles for internal review, security audits, and customer due diligence. Export machine-readable logs plus human-readable summaries.",
     accent: "var(--accent-3)",
   },
   {
-    title: "Built-in Copilot",
-    description: "Shipped as the copilot Module. Chat with the system, query data, edit your code from the chat surface. Zero config — included with every BoringOS host.",
+    title: "Signed Module Trust",
+    description: "Ship and install signed .hebbsmod packages with integrity verification, content-addressing, and predictable lifecycle hooks per tenant.",
     accent: "var(--accent)",
   },
   {
-    title: "Data Sync",
-    description: "Forward-sync ticker pulls Gmail into the inbox every 30s. for-each + create-inbox-item pattern. Dedup built in. Agents process from the queue.",
+    title: "Operations Console",
+    description: "Monitor queue pressure, run health, failures, and incident timelines from one operational view. Diagnose quickly and recover without guesswork.",
     accent: "var(--accent-2)",
   },
 ];
 
 const stats = [
-  { value: "14", label: "npm packages" },
-  { value: "9", label: "built-in modules" },
-  { value: "15", label: "agent personas" },
-  { value: "3", label: "module kinds" },
-  { value: "0", label: "config required" },
-  { value: "< 1min", label: "to first agent" },
+  { value: "100%", label: "actions auditable" },
+  { value: "6", label: "runtime adapters" },
+  { value: "4", label: "budget guardrails" },
+  { value: "1-click", label: "compliance export" },
+  { value: "per-run", label: "replay trail" },
+  { value: "< 5 min", label: "incident triage" },
+];
+
+const trustPillars = [
+  {
+    title: "Immutable timeline",
+    description: "Track who did what, when, and why across agents, workflows, and humans.",
+    accent: "var(--accent)",
+  },
+  {
+    title: "Cost anomaly alerts",
+    description: "Detect spend spikes early and route incidents to the right owner with context.",
+    accent: "var(--accent-2)",
+  },
+  {
+    title: "Policy inheritance",
+    description: "Set org defaults once, then allow scoped tenant exceptions where required.",
+    accent: "var(--accent-3)",
+  },
+  {
+    title: "Signed evidence bundles",
+    description: "Export decision history and run artifacts for enterprise audits and customer security reviews.",
+    accent: "var(--accent)",
+  },
 ];
 
 export default function Home() {
@@ -138,7 +161,7 @@ export default function Home() {
           </div>
 
           <div className="inline-block px-4 py-1.5 border border-[var(--border)] rounded-full text-xs text-[var(--muted)] mb-8">
-            Skills · Tools · Modules — one shape for everything an agent can see and do
+            Budget-aware autonomy · full auditability · runtime freedom
           </div>
 
           <h1 className="text-6xl md:text-7xl font-bold tracking-tight leading-[1.1] mb-6">
@@ -150,7 +173,9 @@ export default function Home() {
           </h1>
 
           <p className="text-lg text-[var(--muted)] mb-12 max-w-2xl mx-auto leading-relaxed">
-            The open-source framework for agentic platforms. Skills teach. Tools do. Modules bundle.
+            The open-source framework for agentic platforms with guardrails that hold at scale.
+            <br />
+            Skills teach. Tools do. Modules bundle. Budgets enforce. Audits explain every action.
             <br />
             <span style={{ color: "var(--accent)" }}>Anyone can ship one. Install with a click.</span>
           </p>
@@ -516,7 +541,7 @@ export default function Home() {
             Your AI team, <span style={{ color: "var(--accent)" }}>orchestrated.</span>
           </h2>
           <p className="text-center text-[var(--muted)] mb-12 max-w-xl mx-auto">
-            Agents delegate, escalate, hand off to humans. They reason in skills, act through tools, and remember across runs.
+            Agents delegate, escalate, and hand off to humans. Any task can route to the best runtime by policy, with fallback chains and shared memory across runs.
           </p>
           <div className="relative bg-[var(--code-bg)] border border-[var(--border)] rounded-2xl overflow-hidden neon-border">
             <AgentOrchestra />
@@ -548,7 +573,7 @@ export default function Home() {
             Workflows you can <span style={{ color: "var(--accent-2)" }}>see</span>.
           </h2>
           <p className="text-center text-[var(--muted)] mb-12 max-w-2xl mx-auto">
-            DAG that dispatches every node through the tool registry — same handlers your agents call. Persisted runs, live SSE, replay, fork-from-here, pause-on-approval. Smart routines target a workflow instead of an agent, so expensive agents only wake when there&apos;s real work.
+            DAG that dispatches every node through the tool registry — same handlers your agents call. Persisted runs, live SSE, replay, fork-from-here, budget gates, and pause-on-approval keep autonomy controlled without slowing teams down.
           </p>
           <div className="relative bg-[var(--code-bg)] border border-[var(--border)] rounded-2xl overflow-hidden neon-border">
             <WorkflowDAG />
@@ -581,7 +606,7 @@ export default function Home() {
             <span className="text-[var(--muted)]">Nothing you don&apos;t.</span>
           </h2>
           <p className="text-center text-[var(--muted)] mb-16 max-w-lg mx-auto">
-            The host (@boringos/core) ships an admin API, auth, SSE bus, budget enforcement, routine scheduler, install pipeline, copilot — all driven by Modules.
+            The host (@boringos/core) ships budget governance, runtime routing, auditable execution, and operations controls alongside the admin API, auth, SSE bus, and module install pipeline.
           </p>
           <div className="grid md:grid-cols-3 gap-6">
             {features.map((f) => (
@@ -793,6 +818,32 @@ export default function Home() {
             <div className="border border-[var(--border)] rounded-xl p-4 bg-[var(--code-bg)] text-center">
               <div className="text-xs text-[var(--muted)]">Sessions auto-named, runs auto-resume, costs tracked</div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust and operations */}
+      <section className="relative z-10 px-6 py-24 border-t border-[var(--border)]">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="inline-block px-3 py-1 border border-[var(--accent-2)] rounded-full text-[10px] uppercase tracking-widest mb-4" style={{ color: "var(--accent-2)" }}>
+              Trust and operations
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              Enterprise control without losing <span style={{ color: "var(--accent-2)" }}>autonomy.</span>
+            </h2>
+            <p className="text-[var(--muted)] max-w-2xl mx-auto">
+              Budgeting, auditability, runtime flexibility, and policy guardrails are not add-ons. They are first-class primitives in the execution path.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            {trustPillars.map((pillar) => (
+              <div key={pillar.title} className="border border-[var(--border)] rounded-2xl p-6 bg-[var(--code-bg)] card-hover">
+                <div className="w-2 h-2 rounded-full mb-3" style={{ backgroundColor: pillar.accent, boxShadow: `0 0 10px ${pillar.accent}` }} />
+                <h3 className="font-semibold mb-2">{pillar.title}</h3>
+                <p className="text-sm text-[var(--muted)] leading-relaxed">{pillar.description}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
