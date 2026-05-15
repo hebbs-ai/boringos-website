@@ -72,50 +72,134 @@ const sections = [
   {
     id: "getting-started",
     title: "Getting Started",
-    content: `## Quick Start
+    content: `## Three things you can do with BoringOS
+
+In the order most people do them:
+
+| # | I want to… | Where to go |
+|---|---|---|
+| 1 | **Just run the BoringOS shell** — copilot, agents org, CRM, workflows, budgets. The default. | This section ↓ |
+| 2 | **Build a Module** that extends the shell with new skills, tools, schema, or UI. | [Build a Module](#build-a-module) |
+| 3 | **Build a completely custom app from scratch** — your own UI, your own domain — using BoringOS as the agentic backbone. | [Core Concepts](#core-concepts) onwards |
+
+---
+
+## 1 — Run the Shell (default)
+
+This is the right starting point for almost everyone. The BoringOS repo ships a complete operating shell — executive brief, copilot, agents org, workflows, budgets, inbox, the CRM module — everything in the [product tour](https://github.com/BoringOS-dev/boringos#product-tour). You don't have to build any of it. Clone the repo and run it.
+
+### Fast path — ask your AI agent
 
 \`\`\`bash
-npx create-boringos my-app
-cd my-app
-npm run dev
+git clone https://github.com/BoringOS-dev/boringos.git
+cd boringos
 \`\`\`
 
-Server starts on **http://localhost:3000** with embedded Postgres. No external dependencies needed.
+Open the repo in your AI coding agent (Claude Code, Codex, Gemini CLI, Cursor, …) and ask:
 
-## Or install manually
+> "Install dependencies and run BoringOS locally on port 3000."
+
+The agent runs the install + dev commands. Embedded Postgres boots automatically. The shell is live at **http://localhost:3000**.
+
+### Manual path
 
 \`\`\`bash
-npm install @boringos/core
+git clone https://github.com/BoringOS-dev/boringos.git
+cd boringos
+pnpm install
+pnpm dev
 \`\`\`
 
-Create \`index.ts\`:
+No config, no external services, no code to write. You get:
+
+- Multi-tenant signup + auth
+- The full shell UI (home, tasks, copilot, agents org, workflows, budgets, inbox, settings)
+- 6 runtimes seeded (claude, chatgpt, gemini, ollama, command, webhook)
+- A copilot agent per tenant, auto-provisioned
+- Embedded Postgres in \`.data/postgres\`
+
+If you only want to **use** BoringOS, stop here. You're done.
+
+---
+
+## When to keep reading
+
+- Want to **add a connector, a vertical app, or new skills/tools** the agent can call? → [Build a Module](#build-a-module)
+- Want a completely **different product surface** (your own UI, your own domain) on top of the framework? → [Core Concepts](#core-concepts) and the rest of these docs.
+- The full **[BUILD_GUIDELINE.md](https://github.com/BoringOS-dev/boringos/blob/main/BUILD_GUIDELINE.md)** on GitHub mirrors this structure with the long-form custom-app guide.
+
+**Using an AI coding agent to build?** Point it at:
+
+1. **[CLAUDE.md](https://github.com/BoringOS-dev/boringos/blob/main/CLAUDE.md)** — framework overview, all packages, every API endpoint
+2. **[BUILD_GUIDELINE.md](https://github.com/BoringOS-dev/boringos/blob/main/BUILD_GUIDELINE.md)** — three-path build guide`,
+  },
+  {
+    id: "build-a-module",
+    title: "Build a Module",
+    content: `**A Module is the primary extension primitive in BoringOS.** It bundles skills (markdown the agent reads), tools (Zod-typed callables the agent invokes), and optionally schema, routines, webhooks, OAuth, and UI. The CRM, Slack, and Google connectors that ship with the shell are all Modules. So is anything you write.
+
+If you want to extend the BoringOS shell with new capabilities **without forking it**, write a Module.
+
+## The minimal module
+
+\`\`\`typescript
+import { z } from "@boringos/module-sdk";
+import type { Module } from "@boringos/module-sdk";
+
+export const helloModule: Module = {
+  id: "hello",
+  name: "Hello",
+  version: "0.1.0",
+  description: "Demo module — one tool, one skill",
+  skills: [{
+    id: "hello",
+    source: "module",
+    body: "Use \`hello.greet\` to greet a user by name.",
+  }],
+  tools: [{
+    name: "greet",
+    description: "Greet someone by name",
+    inputs: z.object({ name: z.string() }),
+    async handler({ name }) {
+      return { ok: true, result: { greeting: \`hello, \${name}\` } };
+    },
+  }],
+};
+\`\`\`
+
+Register it on a running shell before \`listen()\`:
 
 \`\`\`typescript
 import { BoringOS } from "@boringos/core";
+import { helloModule } from "./hello-module.js";
 
 const app = new BoringOS({});
-const server = await app.listen(3000);
-console.log("Running at", server.url);
+app.module(helloModule);
+await app.listen(3000);
 \`\`\`
 
-Run it:
+The agent's prompt now includes a \`## Skills\` block with the \`hello\` entry and a \`## Available tools\` line for \`hello.greet\`. The agent can call:
 
 \`\`\`bash
-npx tsx index.ts
+curl -X POST http://localhost:3000/api/tools/hello.greet \\
+  -H "Content-Type: application/json" \\
+  -d '{"name": "world"}'
 \`\`\`
 
-That's it. Embedded Postgres boots, schema created, 6 runtimes registered, admin API + callback API + SSE events — all ready.
+## Two install paths
 
-## Build Guideline
+1. **Static, at boot** — \`app.module(myModule)\` before \`app.listen()\`. Used by the framework's built-in modules.
+2. **Runtime, via upload** — package as a \`.hebbsmod\` bundle and drop it on the Apps screen. The framework extracts, signature-checks, dynamic-imports, and registers it on the live process.
 
-Read the full **[BUILD_GUIDELINE.md](https://github.com/BoringOS-dev/boringos/blob/main/BUILD_GUIDELINE.md)** for how to structure a BoringOS app — agent definitions, custom context providers, block handlers, seed data, and frontend setup.
+## Full reference
 
-**Using an AI coding agent?** Point it at these two files and let it build:
+The complete module-authoring walkthrough — schema, routines, OAuth, webhooks, UI surfaces, packaging — lives on GitHub:
 
-1. **[CLAUDE.md](https://github.com/BoringOS-dev/boringos/blob/main/CLAUDE.md)** — framework overview, all packages, every API endpoint
-2. **[BUILD_GUIDELINE.md](https://github.com/BoringOS-dev/boringos/blob/main/BUILD_GUIDELINE.md)** — app structure, how to define agents, workflows, connectors, custom schema
-
-Your AI agent reads the specs, understands the framework, and builds your app. That's the BoringOS way.`,
+- **[BUILD-A-MODULE.md](https://github.com/BoringOS-dev/boringos/blob/main/BUILD-A-MODULE.md)** — the practical guide
+- **[MODULES.md](https://github.com/BoringOS-dev/boringos/blob/main/MODULES.md)** — Module manifest schema, field-by-field
+- **[TOOLS.md](https://github.com/BoringOS-dev/boringos/blob/main/TOOLS.md)** — Tool authoring (Zod inputs, handler shape, \`POST /api/tools/<module>.<name>\` dispatch)
+- **[SKILLS.md](https://github.com/BoringOS-dev/boringos/blob/main/SKILLS.md)** — Skill authoring (markdown that lands in the agent's prompt under \`## Skills\`)
+- **[PLUGINS.md](https://github.com/BoringOS-dev/boringos/blob/main/PLUGINS.md)** — Plugin extension points`,
   },
   {
     id: "core-concepts",
