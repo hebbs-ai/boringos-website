@@ -191,6 +191,28 @@ curl -X POST http://localhost:3000/api/tools/hello.greet \\
 1. **Static, at boot** — \`app.module(myModule)\` before \`app.listen()\`. Used by the framework's built-in modules.
 2. **Runtime, via upload** — package as a \`.hebbsmod\` bundle and drop it on the Apps screen. The framework extracts, signature-checks, dynamic-imports, and registers it on the live process.
 
+## Theme support
+
+The shell ships a Light/Dark picker that flips \`data-theme="dark"\` on \`<html>\`. **Any module shipping UI must adopt the shell's theme contract** or its colors stay frozen at build time — a module's CSS overrides the shell's tokens by source order, so a frozen palette breaks dark mode for the whole shell.
+
+The contract is a small set of \`--bos-*\` CSS variables published by \`@boringos/ui/theme.css\`. Reference them from your Tailwind \`@theme\` block:
+
+\`\`\`css
+/* packages/web/src/index.css */
+@import "@boringos/ui/theme.css";
+@import "tailwindcss";
+
+@theme {
+  --color-bg:     var(--bos-bg);
+  --color-text:   var(--bos-text);
+  --color-muted:  var(--bos-muted);
+  --color-border: var(--bos-border);
+  --color-accent: var(--bos-accent);
+}
+\`\`\`
+
+The shell rewrites \`--bos-*\` values on theme switch and your module follows automatically — no rebuild, no event subscription. Full token list in [MODULES.md § Theme support](https://github.com/BoringOS-dev/boringos/blob/main/MODULES.md#theme-support---the---bos--contract).
+
 ## Full reference
 
 The complete module-authoring walkthrough — schema, routines, OAuth, webhooks, UI surfaces, packaging — lives on GitHub:
