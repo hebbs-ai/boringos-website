@@ -1,0 +1,15 @@
+{
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "(.*).boringos.dev"
+        }
+      ],
+      "destination": "https://hebbs.ai",
+      "permanent": true
+    }
+  ]
+}
