@@ -707,8 +707,10 @@ export function HeroCanvas() {
       mouse.y = -9999;
     }
 
-    canvas.addEventListener("mousemove", handleMouseMove);
-    canvas.addEventListener("mouseleave", handleMouseLeave);
+    // Listen on window, not the canvas: the hero content sits above the canvas
+    // (z-10) and would otherwise swallow the mousemove before it reaches us.
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseleave", handleMouseLeave);
     window.addEventListener("resize", resize);
 
     resize();
@@ -718,8 +720,8 @@ export function HeroCanvas() {
     return () => {
       cancelAnimationFrame(rafId);
       window.removeEventListener("resize", resize);
-      canvas.removeEventListener("mousemove", handleMouseMove);
-      canvas.removeEventListener("mouseleave", handleMouseLeave);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseleave", handleMouseLeave);
     };
   }, []);
 
