@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BoringOS — We handle the boring stuff. You change the world.",
-  description: "Takes away all the boring parts of building agentic platforms. Agent execution, workflows, connectors, memory, drive — all handled. Focus on the exciting problems only you can solve.",
+  title: "BoringOS — the open-source framework for agents that do the work",
+  description: "BoringOS runs your agents as the CLI tools you already use — Claude Code, Codex, Gemini, Ollama — wired into tasks, workflows, memory, and a multi-tenant backend. Budgets, audit, and approvals built into the execution path. One command boots the whole thing locally. Built by Hebbs.",
   icons: {
     icon: [
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
@@ -23,8 +23,8 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   openGraph: {
-    title: "BoringOS — We handle the boring stuff.",
-    description: "The framework for building agentic platforms. Focus on the exciting problems only you can solve.",
+    title: "BoringOS — agents that do the work",
+    description: "The open-source framework for building agentic platforms. Run your agents as the CLI tools you already use. Budgets, audit, and approvals built in. Built by Hebbs.",
     url: "https://boringos.dev",
     siteName: "BoringOS",
     type: "website",
@@ -32,8 +32,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "BoringOS — We handle the boring stuff.",
-    description: "The framework for building agentic platforms.",
+    title: "BoringOS — agents that do the work",
+    description: "The open-source framework for building agentic platforms. Built by Hebbs.",
     images: ["/og-image.png"],
   },
 };
